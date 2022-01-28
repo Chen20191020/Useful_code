@@ -1,0 +1,388 @@
+---
+title: 'STA 207: Assignment I'
+
+author: "Name:Chen Qian    SID:918975308"
+
+output:
+  html_document: default
+  pdf_document: default
+---
+***
+
+**Instructions** You may adapt the code in the course materials or any sources (e.g., the Internet, classmates, friends). In fact, you can craft solutions for almost all questions from the course materials with minor modifications. However, you need to write up your own solutions and acknowledge all sources that you have cited in the Acknowledgement section. 
+
+Failing to acknowledge any non-original efforts will be counted as plagiarism. This incidence will be reported to the Student Judicial Affairs. 
+
+*** 
+
+
+A consulting firm is investigating the relationship between wages and occupation. The file `Wage.csv` contains three columns, which are 
+
+  - `wage`, the wage of the subject,
+  - `ethnicity`, the ethnicity of the subject,
+  - and `occupation`, the occupation of the subject. 
+  
+We will only use `wage` and `occupation` in this assignment. 
+
+
+```{r,echo=T,results=F,message=F}
+Wage=read.csv('Wage.csv');
+library(gplots)
+attach(Wage)
+
+```
+
+***
+
+(1) Write down a one-way ANOVA model for this data. For consistency, choose the letters from $\{Y,\alpha, \mu, \epsilon\}$ and use the factor-effect form. 
+```{r}
+# First, we read the dataset and summarize information of wages and occupation.Then, we change occupation to factor. 
+summary(Wage)
+occupation <- as.factor(occupation)
+summary(occupation)
+```
+
+\
+According to the information of data set, we set management(1), office(2), sales(3), services(4), technical(5), worker(6) as 6 levels of factor occupation respectively and let $\mu=\sum_{i=1}^6 w_i \mu_i$ and $\alpha_i = \mu_i -\mu$. Then $\sum_{i=1}^6 w_i \alpha_i=0$.
+the one-way ANOVA model is given as:
+\
+**Factor effect form**
+
+$$
+Y_{ij}=\mu+\alpha_i+\epsilon_{ij}, 
+$$
+where $\{\epsilon_{ij}\}$ are i.i.d. $N(0,\sigma^2)$. 
+\
+$i=1,2,3,4,5,6$, ${\rm 1=management, \ 2=office, \ 3 = sales, \ 4 = services, \ 5 = technical, \ 6 = worker}$
+\
+$j = n_1, n_2, n_3, n_4, n_5, n_6$
+\
+$n_1=55, n_2=97, n_3=38, n_4=83, n_5=105, n_6=156, n_T=534$
+\
+Note: For one-way ANOVA,  $w_i=n_i/n_T$. 
+
+
+
+
+***
+
+(2)  Write down the least squares estimator of $\alpha_i$ for all $i$. Find the expectation and variance of this estimate in terms of $\{n_i\}$ and the parameters of the model. 
+
+     Follow the model in (1), The least squares estimators are $\hat{\mu}=\sum_{i=1}^6 w_i \bar{Y}_{i\cdot}$ and $\hat{\alpha}_i = \bar{Y}_{i\cdot} -\hat{\mu}$. 
+\
+     $\hat{\alpha}_i = \bar{Y}_{i\cdot} - \sum_{i=1}^6 w_i \bar{Y}_{i\cdot}$, where $\bar{Y}_{i\cdot}=\frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}$, $i=1,2,3,4,5,6$
+     
+**Expectation of estimator** 
+$$
+\begin{aligned}
+E(\hat{\alpha}_i)
+& = E(\bar{Y}_{i\cdot} - \sum_{i=1}^6 w_i \bar{Y}_{i\cdot}) \\
+& = E(\frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij} -\sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}) \\
+& = E[\frac{1}{n_i}\sum_{j=1}^{n_{i}} (\mu+\alpha_i+\epsilon_{ij}) -\sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}}  (\mu+\alpha_i+\epsilon_{ij})] \\
+& = \frac{1}{n_i}\sum_{j=1}^{n_{i}} E[\mu+\alpha_i+\epsilon_{ij}] - \sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} E[\mu+\alpha_i+\epsilon_{ij}] \\
+& = \frac{1}{n_i}n_i(\mu+\alpha_i) - \sum_{i=1}^{6}w_i\frac{1}{n_i}n_i(\mu+\alpha_i) \\
+& = \mu+\alpha_i - \sum_{i=1}^{6}w_i\frac{1}{n_i}n_i(\mu+\mu_i - \mu) \\
+& = \mu+\alpha_i - \sum_{i=1}^{6}w_i\mu_i \\
+& = \mu+\alpha_i - \mu \\
+& = \alpha_i\\
+\end{aligned}
+$$
+Expectation of estimator $\hat{\alpha}_i$ is $\alpha_i$ for all $i=1,2,3,4,5,6$
+\
+\
+**Variance of estimator** 
+\
+Note that $\{\epsilon_{ij}\}$ are i.i.d. $N(0,\sigma^2)$, we can get the variance of $Y_{ij}$ is $\sigma^2$ and the covariance between different $Y_{ij}$ is $0$. We will use this property many times. 
+\
+$$
+\begin{aligned}
+V(\hat{\alpha}_k)
+& = V(\bar{Y}_{k\cdot} - \sum_{i=1}^6 w_i \bar{Y}_{i\cdot}) \\
+& = V(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj} -\sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}) \\
+& = V(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj}) + V(\sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}) - 2COV(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj}, \sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}) \\
+& = \frac{1}{n_k^2}\sum_{j=1}^{n_{k}}V(Y_{kj}) + \sum_{i=1}^{6}w_i^2 \frac{1}{n_i^2}V(\sum_{j=1}^{n_{i}} Y_{ij}) - 2COV(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj}, \sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}) \\
+& = \frac{1}{n_k}\sigma^2 + \sum_{i=1}^{6}w_i^2 \frac{1}{n_i}\sigma^2 - 2COV(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj}, \sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}) \\
+\end{aligned}
+$$
+\
+Let's see $COV(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj}, \sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij})$
+\
+\
+**If i is not equal to k**
+\
+$$
+\begin{aligned}
+COV(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj}, \sum_{i=1 ,i\neq k}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij})
+& = \frac{1}{n_k}\sum_{i=1 ,i\neq k}^{6}w_i \frac{1}{n_i}COV(\sum_{j=1}^{n_{k}} Y_{kj}, \sum_{j=1}^{n_{i}} Y_{ij})\\
+& = \frac{1}{n_k}\sum_{i=1 ,i\neq k}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{k}}\sum_{j'=1}^{n_{i}} COV( Y_{kj}, Y_{ij'})\\
+& = \frac{1}{n_k}\sum_{i=1 ,i\neq k}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{k}}\sum_{j'=1}^{n_{i}}0\\
+& = 0\\
+\end{aligned}
+$$
+\
+\
+**If i is equal to k**
+\
+$$
+\begin{aligned}
+COV(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj}, w_k \frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj})
+& = \frac{1}{n_k}w_k\frac{1}{n_k}COV(\sum_{j=1}^{n_{k}} Y_{kj}, \sum_{j'=1}^{n_{k}} Y_{kj})\\
+& = \frac{1}{n_k^2}w_k \sum_{j=1}^{n_{k}}\sum_{j'=1}^{n_{k}} COV( Y_{kj}, Y_{kj'})\\
+& = \frac{1}{n_k^2}w_k \sum_{j=1}^{n_{k}}  \sigma^2 + \frac{1}{n_k^2}w_k \sum_{j=1}^{n_{k}}\sum_{j'=1, j'\neq j}^{n_{k}} COV( Y_{kj}, Y_{kj'})\\
+& = \frac{1}{n_k^2}w_k \sum_{j=1}^{n_{k}}  \sigma^2 + \frac{1}{n_k^2}w_k \sum_{j=1}^{n_{k}}\sum_{j'=1, j'\neq j}^{n_{k}} 0\\
+& = \frac{1}{n_k^2}w_k n_k\sigma^2 \\
+& = \frac{w_k}{n_k} \sigma^2 \\
+\end{aligned}
+$$
+\
+So, we can get,
+\
+$$
+\begin{aligned}
+V(\hat{\alpha}_k)
+& = V(\bar{Y}_{k\cdot} - \sum_{i=1}^6 w_i \bar{Y}_{i\cdot}) \\
+& = V(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj} -\sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}) \\
+& = V(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj}) + V(\sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}) - 2COV(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj}, \sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}) \\
+& = \frac{1}{n_k^2}\sum_{j=1}^{n_{k}}V(Y_{kj}) + \sum_{i=1}^{6}w_i^2 \frac{1}{n_i^2}V(\sum_{j=1}^{n_{i}} Y_{ij}) - 2COV(\frac{1}{n_k}\sum_{j=1}^{n_{k}} Y_{kj}, \sum_{i=1}^{6}w_i \frac{1}{n_i}\sum_{j=1}^{n_{i}} Y_{ij}) \\
+& = \frac{1}{n_k}\sigma^2 + \sum_{i=1}^{6}w_i^2 \frac{1}{n_i}\sigma^2 - 2\frac{w_k}{n_k} \sigma^2\\
+& = \frac{1-2w_k}{n_k}\sigma^2 + \sum_{i=1}^{6}w_i^2 \frac{1}{n_i}\sigma^2 \\
+& = \left(\frac{1}{n_k}-\frac{2w_k}{n_k}+ \sum_{i=1}^{6} \frac{n_i^2}{n_T^2} \frac{1}{n_i}\right)\sigma^2 \\
+& = \left(\frac{1}{n_k} - \frac{2}{n_k}\frac{n_k}{n_T} + \sum_{i=1}^{6} \frac{n_i}{n_T^2} \right)\sigma^2 \\
+& = \left(\frac{1}{n_k} - \frac{2}{n_T} + \frac{1}{n_T} \right)\sigma^2 \\
+& = \left(\frac{1}{n_k} - \frac{1}{n_T} \right)\sigma^2 \\
+\end{aligned}
+$$
+\
+Variance of estimator $\hat{\alpha}_k$ is $\left(\frac{1}{n_k} - \frac{1}{n_T} \right)\sigma^2$ for all $k=1,2,3,4,5,6$
+
+
+*** 
+
+(3) Obtain the main effects plots. Summarize your findings.
+
+*** 
+```{r}
+
+library(gplots)
+options(repr.plot.width=35, repr.plot.height=30)
+par(mfrow=c(1,1))
+# Main effect plot for occupation.
+plotmeans(wage~occupation,xlab="occupation",ylab="wage",
+          main="Main  effect, Occupation",cex.lab=1.5) 
+```
+\
+Main effect plot shows that people whose occupation is `management` has the highest wage on average and whose occupation is the `technical` has the second highest wage on average. So, it may exist a association between `occupation` and `wage` and we also guess that `management` level where the mean wage is the highest.Then, The mean of wage in the rest levels of occupation have no big difference. Besides, `management` and `technical` also show large in-group variance comparing with other levels. Some transformation method may be needed.    
+\
+
+(4) Set up the ANOVA table using `R` for your model. Briefly explain this table.   
+\
+```{r}
+anova.fit<- aov(wage~occupation,data=Wage)
+# Summary
+summary(anova.fit)
+```	
+\
+
+<table style="width:80%">
+  <tr>
+    <th>Source of variation</th>
+    <th>Sum of squares</th>
+    <th>degree of freedom</th>
+    <th>Mean sum of squares</th>
+    <th>F-statistic</th>
+    <th>P value</th>
+  </tr>  
+  
+  <tr>
+    <td>SSTR(occupation) </td>
+    <td>$2538$  </td>
+    <td>$5$ </td>
+    <td>$507.5$ </td>
+    <td>$23.22$</td>
+    <td>$0$</td>
+  </tr>
+  
+  <tr>
+    <td>  SSE  </td>
+    <td> $11539$ </td>
+    <td> $528$ </td>
+    <td>  $21.9$ </td>
+    <td> </td>
+    <td> </td>
+  </tr>
+
+  <tr>
+    <td>SSTO</td>
+    <td>$14077$</td>
+    <td> $534$ </td>
+    <td> </td>
+    <td> </td>
+    <td> </td>
+  </tr>  
+  
+</table>
+
+\
+ANOVA table contains the sum of squares decomposition part and their degree of freedom.SSTR is the sum of squares between different occupation which can be thought as inter-group variation. In this model, SSTR is given by $\sum_{i=1}^6 n_i \big(\bar{Y}_{i\cdot}-\bar{Y}_{\cdot \cdot}\big)^2$, and SSE is the sum of squares within each occupation which is given by $\sum_{i=1}^6 \sum_{j=1}^{n_i} \big(Y_{ij}-\bar{Y}_{i \cdot}\big)^2$ in this model. SSTO is the sum of SSTR and SSE as the total variation of our model. Degree of freedom shows values that have the freedom to vary for SSTR and SSE.each mean sum of squares is defined as sum of squares diveded by its degree of freedom. It also contains F-statistics for the F-test which with the null hypotesis $\alpha_1 = \alpha_2=\alpha_3=\alpha_4=\alpha_5=\alpha_6=0$, p value is obtaiend at the significance level $\alpha=0.05$ for this F test. Basically, ANOVA table contains main statistical information for ANOVA model.  
+
+
+*** 
+
+(5) Test whether there is any association between `occupation` and `wage`. In particular, you need to (a) define the null and alternative hypotheses using the notation in Part 1, (b) conduct the test, and (c) explain your test result. 
+\
+**a.** Existing a association between `occupation` and `wage` means each mean of wage are not equal and some occupation have lager mean of wage.Meanwhile, if the mean of wage in each occupation are not sinificantly different, we may believe that there is no association between `occupation` and `wage`.So, our null hypotheses is $\alpha_1 = \alpha_2=\alpha_3=\alpha_4=\alpha_5=\alpha_6=0$ and our alternative hypotheses is ${\rm not \ all\ } \alpha_i\ {\rm are\ the\ same}.$
+$$
+H_0: \alpha_1 = \alpha_2=\alpha_3=\alpha_4=\alpha_5=\alpha_6= 0 \\
+H_1: {\rm not \ all\ } \alpha_i\ {\rm are\ the\ same}.
+$$
+\
+**b.**  Following the model and the cochran's theorm, we can konw that $E(MSE)=\sigma^2$ and $E(MSTR) = \sigma^2 + \frac{\sum_{i=1}^{r} n_i\alpha_i^2}{r-1}$. By the generalized fisher theorm, we also know that $F^*=\frac{MSTR}{MSE}$ follows a F distribution with degree of freedom $(r-1, n_T - r)$. Then, under the null hypoteses, there is no different between $E(MSE)$ and $E(MSTR)$ which means our $F^*$ should be small. Choosen the significance level $\alpha$ and we can get the reject region RR = $\lbrace F^* > F_{r-1,n_T -r,1-\alpha} \rbrace$.In this case, we choose $\alpha = 0.05$ and get the p value by using R.For checking the result, we can get $F_{r-1,n_T -r,1-\alpha}$ to compare it with F-statistics.
+\
+
+```{r}
+anova.fit<- aov(wage~occupation,data=Wage)
+# Summary
+summary(anova.fit)
+
+# Our threshold to reject null hypoteses. 
+qf(0.95, 5, 528)
+
+# If F* in reject region. 
+23.22 > qf(0.95, 5, 528)
+
+# Visualization of critical value, rejection region for F-test
+r=6;n=534;alpha=0.05;
+x.grid=seq(from=1e-5,to=6,length.out=1000);
+density.grid=df(x=x.grid, df1=r-1, df2=n-r)
+critical.value=qf(1-alpha,df1=r-1,df2=n-r);
+plot(density.grid~x.grid,type='l',xlab="Value of F-stat",ylab="Density",lwd=3,xlim=c(0,6),ylim=c(0,0.8))
+abline(v=critical.value,lwd=3,col='red')
+segments(x0=critical.value,x1=10,y0=0,y1=0,lwd=3,col="orange")
+points(x=critical.value,y=0,pch=16,col="orange",cex=2)
+legend(x=3.8,y=0.8,legend=c(paste0('Critical value ', round(critical.value,digits=2)), 'Rejection region'),lty=1,lwd=3,col=c('Red','Orange'))
+
+```
+\
+**c.** The ANOVA table shows that p value is equal to 0 and F-statistics is in the reject region as well that means we reject the null hypoteses at the significance level $0.05$. So, we believe that there is association between `occupation` and `wage`. For knowing the specific association or if we want to know which type of occupation where the mean wage is the highest, we need further analysis.  
+\
+
+*** 
+
+(6) For the model fitted in Part 4, carry out the necessary diagnostics to check if the model assumptions given in Part 1 are valid. What are your findings?
+\
+We made the assumption that $\{\epsilon_{ij}\}$ are i.i.d. $N(0,\sigma^2)$ for the one-way ANOVA model.Now, let's use Studentized residuals for diagnostics. Generally, we need to check the normality, independent and the homoscedasticity of variance. 
+
+```{r}
+# Studentized residuals, histogram 
+residuals.std = rstudent(anova.fit)
+hist(residuals.std)
+
+# Plot the Studentized residuals against fitted values
+plot(residuals.std~anova.fit$fitted.values,type='p',pch=16,cex=1.5,xlab="Fitted values",ylab="Residuals.std")
+abline(h=0)
+(vars = tapply(residuals.std, Wage$occupation,mean))
+alpha=0.05;
+
+# QQ-plot 
+qqnorm(residuals.std);qqline(residuals.std)
+
+# Calculate the variances for each group
+(vars = tapply(Wage$wage, Wage$occupation,var))
+alpha=0.05;
+
+# Bartlett test
+mse=sum(anova.fit$residuals^2)/anova.fit$df.residual;
+ns=as.numeric(table(Wage$occupation));
+K.stat= (sum(ns)-length(ns))*log(mse)-sum( (ns-1)*log(vars) );
+qchisq(1-alpha,df=length(ns)-1);
+K.stat > qchisq(1-alpha,df=length(ns)-1)
+
+# Levene test
+Wage$res.abs=abs(anova.fit$residuals);
+summary(aov(res.abs~occupation,data=Wage))
+
+# Durbin-Watson test
+library(car)
+durbinWatsonTest(anova.fit)
+```
+*** 
+\
+We found that the qq-plot indicate right skewed and which is consistent with the histogram, normality does not be hold. The plot Studentized residuals against fitted values shows that the variance in each occupation may not be equal and the mean of Studentized residuals are 0. Both results of Bartlett test and Levene test lead us to reject the homoscedasticity of variance at significant level 0.05.Finally, we do the Durbin–Watson test for independent(auto-correlation), DW-statistics is close to 2 and p value is large than 0.05, we do not reject null hypoteses which our model does not exist auto-correlation at significant level 0.05.
+\
+All in all, our one way ANOVA model is lack normality and homoscedasticity of variance in each occupation, we need to make data transformation, in this case, Box-cox transformation could be thought.  
+\
+
+(7) Assuming that the assumptions you made are true, can you statistically conclude if there is one occupation where the mean wage is the highest? Use the most appropriate method (use $\alpha=0.05$) to support your statement.
+\
+We have already known that there is any association between `occupation` and `wage` and basis on assuming that the assumptions you made are true.We first order $\bar Y_{i \cdot}$ from the largest to the smallest, Management could be the occupation where the mean wage is the highest. We use the simultaneous inference to support and check the statement.Our data is unbalanced(even it is not near balanced, the largest different between $n_i$ is $118$ for $i =1,2,3,4,5,6$) so Tukey method may not be appropriate. Besides, occupation has 6 levels, we need to test 5 times (management versus the rest of occupation) to show that our statement is true. 5 is not a very large number. So, we can use Bonferroni method and Scheffe method is not necessarily to be used. As we hold the management like the control group, we can use Dunnett method as well. Even though this method is less conservative than Bonferroni method, Dunnett method is the most appropriate method in this case. In this section, we apply Bonferroni and Dunnett method.
+\
+We first get the $\bar{Y}_{i\cdot}$ for all $i =1,2,3,4,5,6$
+```{r}
+(means = tapply(Wage$wage, Wage$occupation, mean))
+```
+\
+
+**Bonferroni method**
+\
+The null hypotheses of these 5 tests are $\mu_1 = \mu_i$ $i=2,3,4,5,6$ respectively and the alternative hypotheses is $\mu_1 \neq \mu_i$ $i=2,3,4,5,6$(because we want to get the highest), we will reject the null hypotheses when $(\bar{Y}_{1\cdot} -\bar{Y}_{i\cdot}) > t_{n_T - r,\frac{\alpha}{m}} \hat \sigma \sqrt{\frac{1}{n_1}+\frac{1}{n_i}}$ at significant level $\alpha$. 
+\
+```{r}
+# Bonferroni correction: Only 5 need to be check
+alpha= 0.05; 
+p = 15; # choose 2 from 6. 
+B.stat  = qt(1-alpha/(15),anova.fit$df.residual);
+mse=sum(anova.fit$residuals^2)/anova.fit$df.residual;
+
+# Management vs office
+diff12 = means[1] - means[2];
+B = B.stat*sqrt(mse*((1/ns[1]) + (1/ns[2])));
+diff12 > B 
+
+# Management vs sales 
+diff13 = means[1] - means[3];
+B = B.stat*sqrt(mse*((1/ns[1]) + (1/ns[3])));
+diff13 > B 
+
+# Management vs services 
+diff14 = means[1] - means[4];
+B = B.stat*sqrt(mse*((1/ns[1]) + (1/ns[4])));
+diff14 > B 
+
+# Management vs technical
+diff15 = means[1] - means[5];
+B = B.stat*sqrt(mse*((1/ns[1]) + (1/ns[5])));
+diff15 > B 
+
+# Management vs worker
+diff16 = means[1] - means[6];
+B = B.stat*sqrt(mse*((1/ns[1]) + (1/ns[6])));
+diff16 > B 
+```
+\
+We reject the null hypoteses for 4 tests at significant level 0.05 except the test Management vs technical, Bonferroni method said that we can reject that the mean wage of management is equal the mean wage of the rest occupations respectively except technical. So, we can not statistically conclude that management which the mean wage is the highest by the result of Bonferroni method at significant level 0.05.
+\
+\
+**Dunnett method**
+\
+The null hypotheses of these 5 tests are $\mu_1 = \mu_i$ $i=2,3,4,5,6$ respectively and the alternative hypotheses is $\mu_1 \neq \mu_i$ $i=2,3,4,5,6$(because we want to get the highest), the management level as our control group. We will reject the null hypotheses when $(\bar{Y}_{1\cdot} -\bar{Y}_{i\cdot}) > d_{n_T - r,\alpha} \hat \sigma \sqrt{\frac{1}{n_1}+\frac{1}{n_i}}$ at significant level $\alpha$.
+
+```{r}
+options(repos="https://cran.rstudio.com")
+install.packages("DescTools")
+library(DescTools)
+Wage$occupation <- as.factor(Wage$occupation)
+DunnettTest(x= Wage$wage, g= Wage$occupation)
+```
+\
+We reject the null hypoteses for 4 tests at significant level 0.05 except the test Management vs Technical, Dunnett method said that we can reject that the mean wage of management is equal the mean wage of the rest occupations respectively except technical. So, we can not statistically conclude that management which the mean wage is the highest by the result of Dunnett method at significant level 0.05.
+\
+In conclusion, we get the same result by using both methods and it infers that we can not statistically conclude if there is one occupation where the mean wage is the highest at significant level 0.05 because we can not reject that mean wage of Management and Technical is statistically different at significant level 0.05. 
+\
+
+*** 
+## Acknowledgement {-}
+
+## Session information {-}
+```{r}
+sessionInfo()
+```
