@@ -1,0 +1,417 @@
+---
+title: "A comparison of learning outcomes in distinct class-size's influence basis on the STAR Experiment"
+author: "Name:Chen Qian    SID:918975308"
+date: "01/21/2022"
+output:
+  html_document:
+    df_print: paged
+    number_sections: yes
+---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,fig.pos = 'H')
+```
+
+
+# Abstract {-}
+
+ANOVA models have many advantages in random control trials. For instance, This method is very suitable for Class-size studying basis on the project STAR. In this paper, students attends 1st grade are appropriately chosen to compare math score in each type of class by using 2 way ANOVA models. mean and median as 2 summary measures used in this project. Considering the possibility of lack of some assumptions of ANOVA models, nonparametric methods for comparison and bootstrap method are applied as well. The result of ANOVA models shows that there is association between class type and learning outcomes. In addition, small class has the highest mean learning outcomes. Alternatively, in cases of median comparison, there is no statistically highest class type.The nonparametric method shows consistent result on both summary measures which there is no statistically highest class type.
+
+
+# Introduction {-}
+
+The Tennesses Student/Teacher Achievement Ratio study (a.k.a. Project STAR) was conducted in the late 1980s to evaluate the effect of class sizes on test scores. The STAR was a large-scale, randomized, longitudinal experiment conducted between 1985 and 1989 based on early childhood education theory. The STAR experiment was high-intensity, affecting children for the entire school day every day of the school year, for up to four consecutive years. STAR impacted the learning setting directly, influencing all student-teacher interactions taking place in that setting.(Charles M. Achilles, 2012) In this project, The studying data set from an influential randomized experiment. The motivation of this analysis is trying to apply 2-way ANOVA model into social research and improving the approach in education. One possible way is studying the type of class and adjusting the class type by adding student or adding aide. Results from this project can lead schools to make the decision such that if the school needs to add teacher's aide in the class or plan the admission rate to control the number of student in the school.
+
+Specifically, the primary question of interest is whether different class types can affect the learning outcomes, and if so, a secondary question of interest is which class type is associated with the highest outcomes. First, the math scores is chosen as the measurement for learning outcomes and the study randomly assigned students to small classes (13 to 17 students per teacher), regular classes (22 to 25 students per teacher), and regular classes with a teacher's aide (22 to 25 students with a full-time teacher's aide). These 3 types of class are chosen to compare.In addition, considering the influence of each school, the school also is added as a factor in order to eliminate the impact of school different reputation.The interaction of school and class type is thought as well at the beginning. However, interaction term is eliminated finally because there is no significant influence at significant level 0.05. 
+ 
+# Background {-}
+
+In the experiment, over 7,000 students in 79 schools were randomly assigned into one of three interventions: small class, regular class, and regular-with-aide class. In order to randomize properly, schools were enrolled only if they had enough student body to have at least one class of each type. Once the schools were enrolled, students were randomly assigned to the three types of classes, and one teacher was randomly assigned to each class. The data is downloaded from Harvard dataverse. The primary student-level data file contains information on 11,601 students who participated in the experimental phase for at least one year. Information for each of grades K-3 includes demographic variables, school and class identifiers, school and teacher information, experimental condition (“class type”), norm-referenced and criterion-referenced achievement test scores, motivation and self-concept scores. Only 'g1classtype','g1tchid','g1tmathss' and 'g1schid' variables are used in this research because only the math scores in 1st grade is examined in this project which means only subject attends 1st grade are selected. In particular, each teacher as the basic unit of the analysis. To put it in another way, each class (uniquely identified by its assigned teacher) will be treated as an observation. The STAR research shows that small classes in kindergarten through third grade provide short- and long-term benefits for students, teachers and society at large.(Charles M. Achilles, 2012) It is a hint to start a two-way ANOVA model for solving questions. 
+
+# Descriptive analysis {-}
+First, str() is used to find which variable is needed to be selected. The result of str() shows that 'g1classtype', 'g1tchid', 'g1tmathss' and 'g1schid' variables are selected from the data set. Then, rows that their FLAGSG1 equal to 1 are selected for student who attends 1st grade. By the information of univariate descriptive statistics for the selected variables, 231 missing data can be ignored, compared with the large total observations. There is no big different between the mean of the math score which is 530.5 and the median of the math score which is 529.0.More than that, Plot 1 is the histogram of math score shows a centralized distribution.So, mean is chosen as summary measure with teacher as the unit. Then, the mean of students' performance (their math scores in 1st grade) is aggregated by the teacher.After aggregation, the data set contains 339 observations correspond 339 teachers and g1tmathss variable represents the mean of 1st grade math score for each teacher's class. g1classtype is the class type variable which is a factor with level 1(SMALL CLASS), 2(REGULAR CLASS), 3(REGULAR + AIDE CLASS). g1schid is the school ID as a factor with 76 levels represented 76 different schools.
+
+Multivariate descriptive statistics is given for this final data set.For the class type, Plot 2 is boxplot and it shows that class type 1 has the highest mean math socre numerically and the main effect plot (plot 3) also shows that class type 1 has the highest math score on average. So, it may exist a association between class type and math score and we also guess that class type 1 which is small class where the mean math score of student is the highest. Besides, all of 3 levels have the same variation more or less due to the boxplot and main effect plot. For the school ID, the mean math score vary from 488.8137 to 571.3432 and most of school has mean math score larger than 520 basis on the plot 4. the variance in each school is vary from 3.53697 to 1385.64556.According to plot 5 and numerical result, it is obvious that the variation of math score in each school is totally different. 
+
+```{r include=FALSE}
+options(repos="https://cran.rstudio.com")
+install.packages("haven")
+install.packages("ggplot2")
+library(haven)
+library(ggplot2)
+star = read_sav("./STAR_Students.sav")
+star <- as.data.frame(star);
+str(star[,c('g1classtype','g1tchid','g1tmathss', 'g1schid')]);
+
+ob <- star[which(star$FLAGSG1 == 1),c('g1classtype','g1tchid','g1tmathss', 'g1schid')]
+
+ob$g1tchid <- as.factor(ob$g1tchid)
+summary(ob) # table 1
+
+ob <- na.omit(ob) # Eliminate NA 
+summary(ob)
+hist(ob$g1tmathss, main = "Plot 1:Histogram of math score")
+
+data.m <- aggregate(ob[,c('g1tmathss', 'g1classtype','g1schid')], list(ob$g1tchid), mean)
+data.m <- data.m[,c('g1tmathss', 'g1classtype','g1schid')]
+data.m$g1classtype <- as.factor(data.m$g1classtype)
+data.m$g1schid <- as.factor(data.m$g1schid)
+summary(data.m) # table 2
+attach(data.m)
+g1schid
+```
+
+```{r include=FALSE}
+# Basic box plot
+p <- ggplot(data.m, aes(x=g1classtype, y=g1tmathss, fill=g1classtype)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8,
+                outlier.size=4) + 
+  labs(title="Plot 2: Boxplot of class type",x="Class type", y = "math score")
+p + stat_summary(fun.y=mean, geom="point", shape=2, size=3)
+
+library(gplots)
+options(repr.plot.width=35, repr.plot.height=30)
+par(mfrow=c(1,1))
+
+# Main effect plot for class type.
+plotmeans(g1tmathss~g1classtype,xlab="class type",ylab="math score",
+          main="Plot 3: Main  effect, Class type",cex.lab=1.5) 
+
+# Outcome v.s. school IDs
+(means = tapply(g1tmathss, g1schid, mean))
+c(min(means), max(means))
+hist(means, main = "Plot 4: Histogram of school IDs(mean)")
+
+(vars = tapply(g1tmathss, g1schid, var))
+c(min(vars), max(vars))
+hist(means, main = "Plot 5: Histogram of school IDs(variance)")
+```
+
+# Inferential analysis {-}
+
+For the comparison of class-size influence and the experiment is randomized, two-way ANOVA model is used to solve the intrest question. In this project, the model can be defined aas follows:
+$$Y_{ijk} = \mu + \alpha_i+\beta_j + (\alpha\beta)_{ij}+\epsilon_{ijk}, \ k=1,\ldots, n_{ij}, j=1,\ldots, b, i=1,\ldots, a,$$, where the index $i$ represents the class type: small ($i=1$), regular ($i=2$), regular with aide ($i=3$), and the index $j$ represents the school indicator and $j$ has 76 levels, and Index $k$ represents the observations, and $\{\epsilon_{ijk}\}$ are i.i.d. $N(0,\sigma^2)$. 
+
+A quick count shows that there are $a=3$ $\alpha$s, $b=76$ $\beta$s, $ab=228$ interaction terms, one $\mu$ and one $\sigma$ in the 2 way ANOVA factor effect form, which amount to $ab+a+b+2 = 309$ parameters. 
+
+
+Beside the assumption $\{\epsilon_{ijk}\}$ are i.i.d. $N(0,\sigma^2)$.The model is applied for unbalanced data and R deal with the weight as the same for different factor level.So, the over mean $\mu$ is given:
+$$
+\mu =\sum_{i=1}^3 \sum_{j=1}^{76} \frac{\mu_{ij}}{228}, \ \mu_{i\cdot} = \sum_{j=1}^{76} \frac{\mu_{ij}}{76}, \ \mu_{\cdot j}=\sum_{i=1}^3 \frac{\mu_{ij}}{3}, \mu_{ij} = \frac{1}{n_{ij}} \sum_{k=1}^{n_{ij}} \mu_{ijk}
+$$
+factor effects are defined as 
+$$
+\alpha_i=\mu_{i\cdot} - \mu,\ \beta_j=\mu_{\cdot j}-\mu,\ (\alpha\beta)_{ij} =\mu_{ij}-\mu_{i\cdot}-\mu_{\cdot j}+\mu
+$$
+From these definitions, it is natural to show that there are constraints on these effects 
+\begin{align}
+\sum \alpha_i & = \sum \beta_j=0\\
+\sum_{i=1}^a (\alpha\beta)_{ij} & =\sum_{j=1}^b (\alpha\beta)_{ij} =0
+\end{align}
+
+We can now write down the factor effects form with constraints 
+$$
+Y_{ijk} = \mu_{\cdot\cdot} + \alpha_i+\beta_j + (\alpha\beta)_{ij}+\epsilon_{ijk}, \ k=1,\ldots, n, j=1,\ldots, b, i=1,\ldots, a,
+$$
+where $\{\epsilon_{ijk}\}$ are i.i.d. $N(0,\sigma^2)$ and 
+\begin{align}
+\sum_i \alpha_i & = \sum_j \beta_j=0\\
+\sum_{i=1}^3 (\alpha\beta)_{ij} & =\sum_{j=1}^76 (\alpha\beta)_{ij} =0
+\end{align}
+
+Very often the research to use additive model $Y_{ijk} = \mu + \alpha_i+\beta_j + \epsilon_{ijk}$, where the interactions $\{(\alpha\beta)_{ij}\}$ are dropped. Dropping the interaction terms reduces the number of unknown parameters to estimate, which improves efficiency if the reduced model does not fall too far away from the truth. However, full model is applied first in this model.Then,  interactions $\{(\alpha\beta)_{ij}\}$ are dropped by the result of ANOVA table. 
+
+```{r}
+attach(data.m)
+library(stats)
+sig.level=0.05;
+anova.fit <- aov(g1tmathss~g1classtype + g1schid + g1classtype*g1schid, data=data.m)
+summary(anova.fit)
+
+```
+The ANOVA table of full model shows that the interaction term could be dropped(it means that it can not reject that for all $(\alpha\beta)_{ij}$ are equal and they all equal to 0 at significant level 0.05).A additive model $Y_{ijk} = \mu + \alpha_i+\beta_j + \epsilon_{ijk}$ is accepted.
+
+```{r}
+anova.fit <- aov(g1tmathss~g1classtype + g1schid, data=data.m)
+# Summary
+summary(anova.fit)
+head(anova.fit$coefficients,10)
+
+# max and min estimated coefficients for school IDs. 
+c(min(anova.fit$coefficients[-c(1,2,3)]), max(anova.fit$coefficients[-c(1,2,3)]))
+```
+The estimated coefficients for school IDs are vary from -9.230365 to 77.883336 which means the school is significantly influence the math score by the numerical analysis. From statistical respect, the ANOVA table also indicates that school IDs could not be dropped(it means that it should reject that for all $\beta_{j}$ are equal and they all equal to 0 at significant level 0.05). The interest question only focus on class type and if school IDs are ignored, the result of the one way ANOVA model could be obtained by chance.It is hazard to process analysis and get wrong answer when the researcher only use the variable related to their topics.
+
+
+There are 2 main hypotheses to test. Existing a association between class type and math score and Existing a association between school IDs and math score Meanwhile, if the mean math score in each distinct type of class are not significantly different, it will leads to believe that there is no association between class type and math score.So, the null hypotheses is $\alpha_1 = \alpha_2=\alpha_3=0$ and the alternative hypotheses is ${\rm not \ all\ } \alpha_i\ {\rm are\ the\ same}.$ Similarly, if the mean math score in each distinct school are not significantly different, it will leads to infer that there is no association between school IDs and math score.Therefore, the null hypotheses is ${\rm\ all\ } \beta_j\ {\rm are\ the\ same\ and\ they\ are\ equal\ to\ 0}.$ and the alternative hypotheses is ${\rm not \ all\ } \beta_j\ {\rm are\ the\ same}.$ In addition, $\{\epsilon_{ijk}\}$ are i.i.d. $N(0,\sigma^2)$. 
+
+Following the proposed model and the Cochran's theorm, the fact that $E(MSE)=\sigma^2$ and $E(MSTA) = \sigma^2 + \frac{\sum_{i=1}^{3} n_i\alpha_i^2}{3-1}$, where $n_i$ represents the number of observations in cell which class type level is $i$, and $E(MSTB) = \sigma^2 + \frac{\sum_{j=1}^{76} n_j\beta_j^2}{76-1}$, where $n_j$ represents the number of observations in cell which school IDs level is $j$. By the generalized fisher theorm, defined $n_T$ as total number of observations. It also could be known that $F^*=\frac{MSTA}{MSE}$ follows a F distribution with degree of freedom $(3-1, n_T - 2 - 75 - 1)$ and $F^*=\frac{MSTB}{MSE}$ follows a F distribution with degree of freedom $(76-1, n_T - 2 - 75 - 1)$. Then, under the null hypotheses, there is no different between $E(MSE)$ and $E(MSTA)$(or $E(MSE)$ and $E(MSTB)$) which means the $F^*$ should be small. After chosen the significance level $\alpha$ and reject region RR can be given as $\lbrace F^* > F_{a-1,n_T -a-b+1,1-\alpha} \rbrace$ and $\lbrace F^* > F_{b-1,n_T -a-b+1,1-\alpha} \rbrace$ for class type and school IDs respectively.In this case, it is rational to choose $\alpha = 0.05$ and get the p value by using R. For checking the result, $F_{a-1,n_T -a-b+1,1-\alpha}$ and $F_{b-1,n_T -a-b+1,1-\alpha}$ are used to compare it with F-statistics.
+
+**Class type**
+```{r}
+# Summary
+summary(anova.fit)
+
+# Our threshold to reject null hypoteses. 
+qf(0.95, 2, 261)
+
+# If F* in reject region. 
+20.991 > qf(0.95, 2, 261)
+
+# Visualization of critical value, rejection region for F-test
+a=3;b=76;n=339;alpha=0.05;
+x.grid=seq(from=1e-5,to=6,length.out=1000);
+density.grid=df(x=x.grid, df1=a-1, df2=n-a-b+1)
+critical.value=qf(1-alpha,df1=a-1,df2=n-a-b+1);
+plot(density.grid~x.grid,type='l',xlab="Value of F-stat",ylab="Density",lwd=3,xlim=c(0,6),ylim=c(0,0.8))
+abline(v=critical.value,lwd=3,col='red')
+segments(x0=critical.value,x1=10,y0=0,y1=0,lwd=3,col="orange")
+points(x=critical.value,y=0,pch=16,col="orange",cex=2)
+legend(x=3.8,y=0.8,legend=c(paste0('Critical value ', round(critical.value,digits=2)), 'Rejection region'),lty=1,lwd=3,col=c('Red','Orange'))
+```
+The ANOVA table shows that p value is equal to 0 and F-statistics is in the reject region as well that means it should reject the null hypotheses at the significance level $0.05$. So, there is association between class type and math score. 
+
+
+**School IDs**
+```{r}
+# Summary
+summary(anova.fit)
+
+# Our threshold to reject null hypoteses. 
+qf(0.95, 75, 261)
+
+# If F* in reject region. 
+6.593 > qf(0.95, 75, 261)
+
+# Visualization of critical value, rejection region for F-test
+a=3;b=76;n=339;alpha=0.05;
+x.grid=seq(from=1e-5,to=6,length.out=1000);
+density.grid=df(x=x.grid, df1=b-1, df2=n-a-b+1)
+critical.value=qf(1-alpha,df1=b-1,df2=n-a-b+1);
+plot(density.grid~x.grid,type='l',xlab="Value of F-stat",ylab="Density",lwd=3,xlim=c(0,6),ylim=c(0,0.8))
+abline(v=critical.value,lwd=3,col='red')
+segments(x0=critical.value,x1=10,y0=0,y1=0,lwd=3,col="orange")
+points(x=critical.value,y=0,pch=16,col="orange",cex=2)
+legend(x=3.8,y=0.8,legend=c(paste0('Critical value ', round(critical.value,digits=2)), 'Rejection region'),lty=1,lwd=3,col=c('Red','Orange'))
+```
+
+The ANOVA table shows that p value is equal to 0 and F-statistics is in the reject region as well that means it should reject the null hypotheses at the significance level $0.05$. So, there is association between school IDs and math score. 
+\
+\
+For the secondary question of interest, one option is the Tukey's range test. This approach works for pairwise comparisons, e.g., $\mu_i -\mu_{i'}$. The $100(1-\alpha)\%$ confidence interval for $\{\mu_i-\mu_{i'}: i, i' \in \{1,\ldots, r\}, i\neq i'\}$ is 
+$$
+\bar{Y}_{i\cdot} - \bar{Y}_{i' \cdot} \mp T s\big( \bar{Y}_{i\cdot} -\bar{Y}_{i'\cdot} \big), \ i\neq i', \ T=\frac{1}{\sqrt{2}} q(1-\alpha; r, n_T-r), 
+$$
+where $q$ is the studentized range distribution. The coverage is exactly $1-\alpha$ for a balanced ANOVA model, and at least $1-\alpha$ for unbalanced cases. The null hypoteses for each test is $\mu_i=\mu_{i'}:  i\neq i'$ and the alternative hypoteses is $\mu_i\neq \mu_{i'}:  i\neq i'$. $\{\epsilon_{ijk}\}$ are i.i.d. $N(0,\sigma^2)$ and it is rational to choose $\alpha = 0.05$. The null hypoteses is rejected when The $100(1-\alpha)\%$ confidence interval for $\{\mu_i-\mu_{i'}: i, i' \in \{1,\ldots, r\}, i\neq i'\}$ contains $0$ at significant level 0.05.
+
+A briefly process is given:
+
+$$
+(x_1,...,x_n) \sim N(0, \sigma^2) \\
+Studentized : \frac{X}{\hat{\sigma}} \\
+q(l,n) = \frac{max{\{x_1,..,x_n\}} - min{\{x_1,...,x_n\}}}{\hat{\sigma}} \\
+\frac{l\hat{\sigma}^2}{\sigma^2} \sim \chi_l^2 \\
+\overline{y}_{1.} \le \overline{y}_{2.} \le...\overline{y}_{a.}\\
+H_0: \mu + \alpha_1 = \mu + \alpha_a \\ 
+H_1: \mu + \alpha_1 \not= \mu + \alpha_a\\
+\frac{\overline{y}_{a.}-\overline{y}_{1.}}{\sqrt{\frac{MS_E}{n}}}|H_0 \sim q_\alpha(N - a, a) \\
+CI(HSD): \overline{y}_{a.}-\overline{y}_{1.} > q_\alpha(N - a, a)\sqrt{\frac{MS_E}{n}} \\
+H_0: \mu + \alpha_i = \mu + \alpha_j  \\ 
+H_1: \mu + \alpha_i \not= \mu + \alpha_j \\
+CI(HSD): |\overline{y}_{i.}-\overline{y}_{j.}| > q_{\alpha}(N - a, a)\sqrt{\frac{MS_E}{n}} 
+$$
+
+```{r}
+TukeyHSD(anova.fit, conf.level=.95)$g1classtype
+par(mfrow=c(1,1))
+plot(TukeyHSD(anova.fit, conf.level=.95), las = 2)
+```
+
+We reject the null hypoteses for 2 tests at significant level 0.05 except the test class type 2 vs class type 3. The results of Tukey method said that null hypotheses that the mean math score of class type 1 is equal the mean math score of class type 2 and class type3 respectively can be rejected at significant level 0.05. So, this result leads to statistically conclude that class type 1(small size) which the mean math score is the highest at significant level 0.05.
+
+# Sensitivity analysis {-}
+
+The assumption that $\{\epsilon_{ijk}\}$ are i.i.d. $N(0,\sigma^2)$ is made for the two-way ANOVA model. Now, Studentized residuals is used for diagnostics. Generally, it is needed to check the normality and the homoscedasticity of variance. 
+
+```{r}
+# Studentized residuals, histogram 
+residuals.std = rstudent(anova.fit)
+hist(residuals.std)
+
+# Plot the Studentized residuals against fitted values
+plot(residuals.std~anova.fit$fitted.values,type='p',pch=16,cex=1.5,xlab="Fitted values",ylab="Residuals.std")
+abline(h=0)
+
+# QQ-plot 
+qqnorm(residuals.std);qqline(residuals.std)
+
+# Calculate the variances for each group
+(vars = tapply(residuals.std, data.m$g1classtype, var))
+
+
+# Levene test
+data.m$res.abs=abs(anova.fit$residuals);
+summary(aov(res.abs~g1classtype,data=data.m))
+
+```
+\
+The qq-plot indicate heavy-tail and which is consistent with the histogram, normality does not be hold. The plot Studentized residuals against fitted values shows that the variance in each class type may be equal.The result of levene test leads to does not reject the homoscedasticity of variance at significant level 0.05.The two way ANOVA model is lack of normality, alternative methods can be apply in this case.First, median is used as summary measures rather than mean. Second, nonparametric approach is applied to compare.
+
+**Median as summary measures**
+```{r}
+ob <- na.omit(ob) # Eliminate NA
+data.m <- aggregate(ob[,c('g1tmathss', 'g1classtype','g1schid')], list(ob$g1tchid), median)
+data.m <- data.m[,c('g1tmathss', 'g1classtype','g1schid')]
+data.m$g1classtype <- as.factor(data.m$g1classtype)
+data.m$g1schid <- as.factor(data.m$g1schid)
+attach(data.m)
+anova.fit <- aov(g1tmathss~g1classtype + g1schid + g1classtype*g1schid, data=data.m) # also interaction term can be dropped.
+summary(anova.fit)
+
+anova.fit <- aov(g1tmathss~g1classtype + g1schid, data=data.m)
+summary(anova.fit)
+TukeyHSD(anova.fit, conf.level=.95)$g1classtype
+# Studentized residuals, histogram 
+
+residuals.std = rstudent(anova.fit)
+hist(residuals.std)
+
+# Plot the Studentized residuals against fitted values
+plot(residuals.std~anova.fit$fitted.values,type='p',pch=16,cex=1.5,xlab="Fitted values",ylab="Residuals.std")
+abline(h=0)
+
+# QQ-plot 
+qqnorm(residuals.std);qqline(residuals.std)
+
+# Calculate the variances for each group
+(vars = tapply(residuals.std, data.m$g1classtype, var))
+
+# Levene test
+data.m$res.abs=abs(anova.fit$residuals);
+summary(aov(res.abs~g1classtype,data=data.m))
+```
+The process is same as before, for the median as summary measures.However, it can not to conclude that calss type 1 is the highest math score no longer by using median.In the sensitivity analysis, the qq-plot indicate normal distributed and which is consistent with the histogram, normality holds. The plot Studentized residuals against fitted values shows that the variance in each may be not equal.The result of levene test leads to reject the homoscedasticity of variance at significant level 0.05 but it can not be reject at significant level 0.01.The two way ANOVA model is lack of homoscedasticity of variance at significant level 0.05 but not at significant level 0.01, compared with mean. Sensitivity analysis shows median is better to use. 
+
+
+
+**Nonparametric approach**
+
+The Friedman test is a non-parametric statistical test developed by Milton Friedman. it is used to detect differences in treatments across multiple test attempts.
+The null hypotheses is equality of math score of 3 class types and the alternative hypotheses is existing 2 calsses contain not equal. Given $R_{ik}$ as the rank of $\mu_{ik}$ in class level $i$, where $i = 1,2,3$ and $k = 1,..,n$. The Friedman statistics is given as 
+$$
+F = \frac{12}{3*(3+1)n} \sum_{i =1}^3 R^2_{i \cdot} - 3n(3+1) 
+$$
+When the sample is large, the Friedman Statistics follows a chi-squared distribution with degree of freedom 2. So, the reject region is given as $\lbrace F > \chi^2_{2,1-\alpha} \rbrace$. It requires the data is balanced. However, the data set in this project is imbalanced, one way to solve this issue is using bootstrap method. Take the $n=min\lbrace n_1, n_2,n_3\rbrace$ and resampling for other sample to get n observations then applying 3 samples to run the test and get result. After repeated this process enough times and then make the conclusion. In this project, only one time is implemented. 
+
+```{r}
+ct_1 <- data.m[which(g1classtype == 1),]
+ct_2 <- data.m[which(g1classtype == 2),]
+ct_3 <- data.m[which(g1classtype == 3),]
+set.seed(123)
+ct_1 <- sample(ct_1$g1tmathss, 100, replace = FALSE)
+ct_2 <- sample(ct_2$g1tmathss, 100, replace = FALSE)
+ct_3 <- sample(ct_3$g1tmathss, 100, replace = FALSE)
+mat <- cbind(ct_1, ct_2, ct_3)
+mat <- as.matrix(mat)
+friedman.test(mat)
+```
+```{r}
+ob <- na.omit(ob) # Eliminate NA
+data.m <- aggregate(ob[,c('g1tmathss', 'g1classtype','g1schid')], list(ob$g1tchid), mean)
+data.m <- data.m[,c('g1tmathss', 'g1classtype','g1schid')]
+data.m$g1classtype <- as.factor(data.m$g1classtype)
+data.m$g1schid <- as.factor(data.m$g1schid)
+attach(data.m)
+```
+
+```{r}
+ct_1 <- data.m[which(g1classtype == 1),]
+ct_2 <- data.m[which(g1classtype == 2),]
+ct_3 <- data.m[which(g1classtype == 3),]
+set.seed(123)
+ct_1 <- sample(ct_1$g1tmathss, 100, replace = FALSE)
+ct_2 <- sample(ct_2$g1tmathss, 100, replace = FALSE)
+ct_3 <- sample(ct_3$g1tmathss, 100, replace = FALSE)
+mat <- cbind(ct_1, ct_2, ct_3)
+mat <- as.matrix(mat)
+friedman.test(mat)
+```
+
+The result of Friedman rank sum test shows p-value is 0.00247 and leads to reject null hypotheses at significant level 0.05 when median is used and the result of Friedman rank sum test shows p-value is 0.00509 and leads to reject null hypotheses at significant level 0.05 when mean is used. Both results mean that at least 2 of the classes type are significantly different from each other at significant level 0.05.
+
+
+# Discussion {-}
+
+At the beginning, the data set is collected from  Harvard dataverse. Only 'g1classtype','g1tchid','g1tmathss' and 'g1schid' variables are used in this research. Each teacher as the basic unit of the analysis. To put it in another way, each class (uniquely identified by its assigned teacher) will be treated as an observation. summary measure starts with mean and after aggregate data, descriptive analysis is given including Statistics summary and several plots like histogram and box plot to briefly look the data set. Then, 2 way ANOVA model is established with full model.The next step is analysis and fitting model by using R.Final model is 2 way ANOVA model without all interaction terms.During the sensitivity analysis, median of math score is applied and nonparametric method is also used as alternative approach when some assumptions of ANOVA model do not hold. The main findings is that there is association between class type and learning outcomes. In detail, when mean of math score is used as summary measure, small class shows the highest learning outcomes. It suggests that if a student who study in a small size class, he or she will study math better than a student who study in a large size class even with teacher aide.However, when median of math score or nonparametric method are used, there is no class type with statistically highest math score.It seems different approach can conclude different result.In this case, two main task are needed to focus.The result shows school IDs is a factor significantly influence the math score as well, it is possible that other confounded variable could also influence the math score, for instance, how to prove that the different teacher have the same level of teaching. How can we sure that each student has no variability in learning skills. In the future research, these will be  crucial topic to discuss. The second task is creating a complete process to use bootstrap method. In this project, bootstrap method is used when nonparametric is applied but there is no more detail to support this method. researcher could discuss about this part in the future by using several distinct bootstrap methods. 
+
+# Acknowledgement {-}
+In this project, the author discussed with guanghao He, xiaoran Zhu and Jake Gwo. They worked as a team in STA207 course. 
+
+# Reference {-}
+Achilles, Charles M. (2012). Class-Size Policy: The STAR Experiment and Related Class-Size Studies. NCPEA Policy Brief. NCPEA Publications.
+
+# Appendix(R code for Descriptive analysis part) {-}
+
+```{r}
+options(repos="https://cran.rstudio.com")
+install.packages("haven")
+install.packages("ggplot2")
+library(haven)
+library(ggplot2)
+star = read_sav("./STAR_Students.sav")
+star <- as.data.frame(star);
+str(star[,c('g1classtype','g1tchid','g1tmathss', 'g1schid')]);
+
+ob <- star[which(star$FLAGSG1 == 1),c('g1classtype','g1tchid','g1tmathss', 'g1schid')]
+
+ob$g1tchid <- as.factor(ob$g1tchid)
+summary(ob) # table 1
+
+ob <- na.omit(ob) # Eliminate NA 
+summary(ob)
+hist(ob$g1tmathss, main = "Plot 1:Histogram of math score")
+
+data.m <- aggregate(ob[,c('g1tmathss', 'g1classtype','g1schid')], list(ob$g1tchid), mean)
+data.m <- data.m[,c('g1tmathss', 'g1classtype','g1schid')]
+data.m$g1classtype <- as.factor(data.m$g1classtype)
+data.m$g1schid <- as.factor(data.m$g1schid)
+summary(data.m) # table 2
+attach(data.m)
+g1schid
+```
+
+```{r}
+# Basic box plot
+p <- ggplot(data.m, aes(x=g1classtype, y=g1tmathss, fill=g1classtype)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8,
+                outlier.size=4) + 
+  labs(title="Plot 2: Boxplot of class type",x="Class type", y = "math score")
+p + stat_summary(fun.y=mean, geom="point", shape=2, size=3)
+
+library(gplots)
+options(repr.plot.width=35, repr.plot.height=30)
+par(mfrow=c(1,1))
+
+# Main effect plot for class type.
+plotmeans(g1tmathss~g1classtype,xlab="class type",ylab="math score",
+          main="Plot 3: Main  effect, Class type",cex.lab=1.5) 
+
+# Outcome v.s. school IDs
+(means = tapply(g1tmathss, g1schid, mean))
+c(min(means), max(means))
+hist(means, main = "Plot 4: Histogram of school IDs(mean)")
+
+(vars = tapply(g1tmathss, g1schid, var))
+c(min(vars), max(vars))
+hist(means, main = "Plot 5: Histogram of school IDs(variance)")
+```
+
+# Session info {-}
+
+<span style='color:blue'>
+Report information of your `R` session for reproducibility. 
+</span> 
+
+
+```{r}
+sessionInfo()
+```
