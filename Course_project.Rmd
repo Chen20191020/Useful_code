@@ -1,0 +1,883 @@
+---
+title: "Forecasting and comparison of COVID-19 covid end date in US, Canada and Spain using LSTM networks"
+author: "Name:Chen Qian    SID:918975308"
+output: html_document
+---
+
+# Introduction {-}
+
+Since the beginning of 2020, an outbreak of a pandemic disease started in the world.On the one hand, all communities was working together to against COVID-19. On the other hand, with the invention of the COVID-19 vaccine and the implementation of various pandemic prevention measures such as facial coverings and closure of schools, people are beginning to look forward to the end of the pandemic. Although the Omicron variant makes the end date unpredictable again, we still want to know when the world will get back normal. Fortunately, Recurrent Neural Network in machine learning provides a feasible solution for forecasting, especially since all data related to COVID-19 are time sequence, and the more recent pandemic situation will have a greater impact on the future pandemic situation, so the long short-term memory model should be considered appropriately.Moreover, compared with ARIMA model, the process of modeling the ANN model is easier. Especially, basic RNN structure and internal structure of LSTM are given by researchers including deciding the number of hidden layers and number of memory cells. Otherwise, in the process of training the recurrent neural network, gradient descent algorithm and Backpropagation method are used. Then, computer will train the ANN model automatically and parameters will automatically be obtained as well. In addition, ANOVA or analysis of variance is considered for comparison Overall, this paper aims to forecasting of COVID-19 end date in United States, Canada, Spain using LSTM networks and comparing end date in each country if they are significant different basis on the forecasting results.We want to predict the possible end date of COVID-19 pandemic in each country with the assumption that new variant will not appear in the future. It also help and as a reference for people to make decision such that government makes polices or university decides if take course in-person, etc. We will explore the WHO COVID-19 data from the WHO office website and vaccination data from website Ourworldindata in this project.The data of both websites are authentic and reliable data that has been officially confirmed.The report is organized as follows. Section 2 reviews the background of the COVID-19 pandemic.Section 3 explores the dataset and gives the process of features building. Section 4 introduces the background of RNN and LSTM models used, assumptions stated in this paper. Section 5 contains model fitting that includes the explanation of training LSTM models, performing results with explanation. Section 6 is sensitivity analysis. Section 7 focus on conclusion and discussion.
+
+# Background {-}
+On March 11th 2020, World Health Organization declared the COVID-19 virus as global pandemic. COVID-19 was first found in Wuhan, Hubei province in China around December 2019 and spread out all over the world.Until 2 March 2022, 16:00 GMT-8, there is 438968263 confirmed cases and 5969439 confirmed deaths in the world.Around December 2020, first COVID-19 vaccine was produced massively and used.Until these days, 4327599641 persons are fully vaccinated and 4904935610 persons are vaccinated with at least one dose.Facial coverings, adaptation or closure of schools and businesses, limits and restrictions on public and private gatherings, restrictions on domestic movement, international travel restrictions, are main 6 measures to prevent COVID-19 in the world.The pandemic situation has been under control in many countries. World Health Organization collects data about this pandemic for research and prevent COVID-19 virus including Date_reported, Country_code, Country, WHO_region, New_cases, Cumulative_cases, New_deaths, Cumulative_deaths 8 variables more than 187180 records.Based on this dataset, we select data where country equal to Spain, Canada, United States of America with New_cases, Cumulative_cases, New_deaths	and Cumulative_deaths	4 variables for our forecasting task.Then, Ourworldindata also offers official COVID-19 data about vaccination.We select people_fully_vaccinated variable and where country equal to Spain, Canada, United States of America as our vaccination feature. 
+
+# Descriptive analysis {-}
+
+First, str() is used to find which variable is needed to be selected. The result of str() shows that 'Country','Date_reported', 'New_cases', 'Cumulative_cases','New_deaths' and 'Cumulative_deaths' 5 variables from WHO-COVID-19-global-data and 'date', 'location', 'people_fully_vaccinated' variables from Ourworldindata are selected from the full data set. Then, rows that their Country equal to `Canada`, `Spain` and `United States` are selected for these 3 countries. By the information of univariate descriptive statistics for the selected variables, missing data should be ignored.So, we only focus on the period 2021-01-18 to 2022-02-27 because there are no missing records in this period for each country and variable.Given a previously look,we can found that the peak of new_cases appears at the beginning of 2022 in all 3 countries, especially in US. This peak can possible due to the Omicron variant.It indicates that new variant has significant influence to the COVID-19 new cases data and it is hard to control.Therefore, we assume that there is no new variant in the future for forecasting.The new deaths arrived the top at the beginning of pandemic, around January 2021 and after omicron appeared which is consistent with the increasing of new cases. A simple causality relationship is that the augment of new cases intrigues the increasing of new deaths because new deaths have no affect to normal people.The fully vaccinated data started far from zero since 2021, the trend rocketed first and then tended to slow in all 3 countries.When it grows rapidly, we can find that both new cases and new deaths have a downward trend. COVID-19 vaccine is for prevention and we believe that vaccine will have positive impact to end the pandemic. Case fatality rate(CFR) which grew rapidly in the early days of the pandemic and peaked in July 2020, before declining. The three countries have the same trend. For forecasting part, the original data is daily and there is less significant using daily data, compared with weekly data, because of the delay effect of spread of the virus.And the definition of end date for pandemic is also needed. In addition, the influence of vaccine and ability of transmission of virus are also considered.Finally, effect of measurements should be included.
+
+
+
+```{r echo=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(reticulate)
+library(lme4)
+library(car)
+library(carData)
+library(MASS)
+```
+
+```{r echo=FALSE}
+covid <- read_csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
+vaccine <- read_csv("./Full_data.csv")
+str(covid)
+summary(covid)
+
+covid$Country <- as.factor(covid$Country)
+covid$Country_code <- as.factor(covid$Country_code)
+covid$WHO_region <- as.factor(covid$WHO_region)
+
+df <- covid[covid$Country == "United States of America" |covid$Country == "Canada" | covid$Country == "Spain" ,]
+
+summary(covid[covid$Country == "United States of America",])
+head(covid[covid$Country == "United States of America",], 20)
+df_u <- covid[covid$Country == "United States of America",]
+df_u$Date_reported <- as.Date(df_u$Date_reported)
+```
+
+```{r echo=FALSE}
+# time series plot 
+df <- covid[covid$Country == "United States of America" |covid$Country == "Canada" | covid$Country == "Spain" ,]
+ggplot(df, aes(x = df$Date_reported, y = df$New_cases)) + 
+  geom_line(aes(color = df$Country), size = 1) +
+  theme_minimal()
+
+ggplot(df, aes(x = df$Date_reported, y = df$New_deaths)) + 
+  geom_line(aes(color = df$Country), size = 1) +
+  theme_minimal()
+```
+
+```{r echo=FALSE}
+str(vaccine)
+df_v <- vaccine[vaccine$location == "United States" |vaccine$location == "Canada" | vaccine$location == "Spain" ,]
+ggplot(df_v, aes(x = df_v$date, y = df_v$people_fully_vaccinated)) + 
+  geom_line(aes(color = df_v$location), size = 1) +
+  theme_minimal()
+```
+
+
+```{r echo=FALSE}
+df$cfr <- df$Cumulative_deaths/df$Cumulative_cases
+df_aux <- df[-which(is.na(df$cfr)), ]
+df_aux
+ggplot(df_aux, aes(x = df_aux$Date_reported, y = df_aux$cfr)) + 
+  geom_line(aes(color = df_aux$Country), size = 1) +
+  theme_minimal()
+```
+
+
+**Feature building**
+
+The transmission rates is defined as New cases divided by cumulative total cases, The idea is basis on the focus of patients. In this case, transmission rate indicates the proportion of new cases in each day and this metric naturally is predicted converge to 0 as the decreasing of new cases.In detail, if this rate is close to 0 for a new day, smaller than some selected threshold. It means that there is no more new case in the future.We selected 0 as the threshold. Then, we can rational conclude that the end points of pandemic, when other variant does not appear and all patients are cared well(the assumption that the existing patients do not have change to contagion normal people.Ideally, they follow the polices stay at home or hospital.Therefore, if transmission rates is at least no lager than 0, we will say that the end of the pandemic. Another inputs variable is case-mortality rate or case fatality rate(CFR) which is defined as the ratio between confirmed deaths and confirmed cases. Our rolling-average CFR is calculated as the ratio between the 7-day average number of deaths and the 7-day average number of cases 10 days earlier. Because not only the size of patients but we also should think about the ability of transmission by different type of virus. In this case, case-mortality rate could be one of measurement to reflect the ability of transmission because, in general, higher ability of transmission means less ability of mortality by medical proof. Vaccine number,more specific, total number of people who received all doses prescribed by the initial vaccination protocol, divided by the total population of the country, is also part of inputs because of considering the role of vaccines, when more and more people are vaccinated, the infection of the virus will become more difficult.We also made feature scaling to unit length for people fully vaccinated for the fair weight of network nods. In forecasting part, we multiple constant 10 for each variable in Canada and Spain due to the better model results without loss of generality. Finally, the whole data set is aggregated as weekly data.We selected mean statistic for transmission rate,CFR and the maximum value in each week for people fully vaccinated number because we do not think that vaccine has the delay effect but it works right away. 2 consecutive transmission rate with CFR and people fully vaccinated number are inputs for each next week forecasting. Moreover, WHO Coronavirus Dashboard contains the Public health and social measures (PHSM) in use.These measurements have effect to COVID-19 as well because, intuitively, measures are crucial for reducing transmission rate and they can not be ignored.So, bidirection LSTM is used, it will contain the influence of measures automatically because of using all information to predict.Considering causality relationship, we made the assumption that the normal sequential prediction follows outcomes(with measures) to get results and the inverse sequential prediction follows potential outcomes(without measures) to get results.So, the prediction mixed the all possible effect from measures. Feature building process is made by Python for convenience. The output table for 3 countries are below.
+
+**Python code: ETL**
+
+```
+# ETL process(country Canada, United States of America, Spain, 2021-01-018 to 2022-02-27)
+df = df_n[df_n['Country'].isin(['Spain','Canada','United States of America'])]
+df = df[df['New_cases'].notnull()]
+df = df[df['Cumulative_cases'].notnull()]
+df = df[df['New_deaths'].notnull()]
+df = df[df['Cumulative_deaths'].notnull()]
+df = df.reset_index(drop = True)
+df_c = df[(df['Country'] == 'Canada') & (df['Date_reported'] >= '2021-01-18') & (df['Date_reported'] <= '2022-02-27')]
+df_s = df[(df['Country'] == 'Spain') & (df['Date_reported'] >= '2021-01-18') & (df['Date_reported'] <= '2022-02-27')]
+df_u = df[(df['Country_code'] == 'US') & (df['Date_reported'] >= '2021-01-18') & (df['Date_reported'] <= '2022-02-27')]
+df_c = df_c.reset_index(drop = True)
+df_s = df_s.reset_index(drop = True)
+df_u = df_u.reset_index(drop = True)
+
+
+df_c['week'] = pd.DataFrame([j for j in range(int(df_c.shape[0]/7)) for i in range(7)])
+df_s['week'] = pd.DataFrame([j for j in range(int(df_c.shape[0]/7)) for i in range(7)])
+df_u['week'] = pd.DataFrame([j for j in range(int(df_c.shape[0]/7)) for i in range(7)])
+
+
+df_c['transmission_rate'] = df_c['New_cases']/df_c['Cumulative_cases']*10
+df_s['transmission_rate'] = df_s['New_cases']/df_c['Cumulative_cases']*10
+df_u['transmission_rate'] = df_u['New_cases']/df_c['Cumulative_cases']
+
+df_c['case_fatality_rate'] = df_c['Cumulative_deaths']/df_c['Cumulative_cases']*10
+df_s['case_fatality_rate'] = df_s['Cumulative_deaths']/df_c['Cumulative_cases']*10
+df_u['case_fatality_rate'] = df_u['Cumulative_deaths']/df_c['Cumulative_cases']
+df_c = df_c.groupby('week').mean().reset_index()
+df_s = df_s.groupby('week').mean().reset_index()
+df_u = df_u.groupby('week').mean().reset_index()
+df_c['Country'] = 'Canada'
+df_s['Country'] = 'Spain'
+df_u['Country'] = 'United States'
+
+# useful vaccinated data
+dfv = dfv[dfv['location'].isin(['Canada','United States', 'Spain'])][['location', 'date','people_fully_vaccinated']]
+
+dfv_c = dfv[(dfv['location'] == 'Canada') & (dfv['date'] >= '2021-01-18') & (dfv['date'] <= '2022-02-27')]
+dfv_u = dfv[(dfv['location'] == 'United States') & (dfv['date'] >= '2021-01-18') & (dfv['date'] <= '2022-02-27')]
+dfv_s = dfv[(dfv['location'] == 'Spain') & (dfv['date'] >= '2021-01-18') & (dfv['date'] <= '2022-02-27')]
+dfv_c = dfv_c.reset_index(drop = True)
+dfv_s = dfv_s.reset_index(drop = True)
+dfv_u = dfv_u.reset_index(drop = True)
+dfv_c['week'] = pd.DataFrame([j for j in range(int(dfv_c.shape[0]/7)) for i in range(7)])
+dfv_u['week'] = pd.DataFrame([j for j in range(int(dfv_u.shape[0]/7)) for i in range(7)])
+dfv_s['week'] = pd.DataFrame([j for j in range(int(dfv_s.shape[0]/7)) for i in range(7)])
+dfv_c = dfv_c.groupby('week').max().reset_index()
+dfv_u = dfv_u.groupby('week').max().reset_index()
+dfv_s = dfv_s.groupby('week').max().reset_index()
+
+dfv_c['people_fully_vaccinated'] = dfv_c['people_fully_vaccinated']/sum(dfv_c['people_fully_vaccinated']**2)**(1/2)
+dfv_s['people_fully_vaccinated'] = dfv_s['people_fully_vaccinated']/sum(dfv_s['people_fully_vaccinated']**2)**(1/2)
+dfv_u['people_fully_vaccinated'] = dfv_u['people_fully_vaccinated']/sum(dfv_u['people_fully_vaccinated']**2)**(1/2)
+
+df_c['people_fully_vaccinated'] = dfv_c['people_fully_vaccinated']*10
+df_s['people_fully_vaccinated'] = dfv_s['people_fully_vaccinated']*10
+df_u['people_fully_vaccinated'] = dfv_u['people_fully_vaccinated']
+
+df_auxa = pd.concat([df_u,df_s])
+df_all = pd.concat([df_auxa,df_c])
+df_all
+```
+**Table present here with plot**
+
+# Inferential analysis {-}
+
+**Artificial neural network**
+
+Artificial neural networks computing systems vaguely inspired by the biological neural networks that constitute animal brains (Chen et al., 2019). The central idea is to extract linear combinations of the inputs as derived features, and then model the target as a nonlinear function of these features (Hastie et al., 2009). Statistically speaking, Artificial neural networks consist of neurons that contain any activation function such as sigmoid and analogous regression model without strict assumptions so it can be given: $y=f(b+\sum w_ix_i)$ where $f$ can be any activation function. $x_i$ is an attribute of input x. $w_i$ is named weight and $b$ is called bias. Thousands of neurons constitute an artificial neural network that can be presented: $y=f(w^L...f(w^2f(w^1x+b^1)+b^2)...+b^L)$. $w^1,w^2,...,w^L$ are matrices of weight and $b^1,b^2,...,b^L$ are matrices of bias. The first structure $f(w^1x+b^1)$ is called the input layer and the outermost structure $f(w^L......+b^L)$ is named the output layer. Remaining parts are hidden layers. A simple and typical artificial neural network (Fully Connect Feedforward Network) can be present graphically (Huang, 2017):
+
+```{r out.width = '30%'}
+# Figure 1: Fully Connect Feedforward Network
+knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure1.png")
+```
+
+However, this basic structure does not handle memory which is important for time series because observations of time series are dependent on previous ones. Hence, this paper uses another neural network named recurrent neural network to consider memory as an important feature that can affect future output as well.
+
+Recurrent neural network (or Bidirrection RNN)
+In the field of artificial neural network, the recurrent neural network is typically used in time series because the output of hidden layer is stored in the memory. In this case, memory is considered as another input for the next moment. Generally, memory is given initial values and substituted by the output of hidden layer (Elman Network) in each moment. In addition, the output of output layer can be stored in memory as well (Jordan Network). A simple and typical recurrent neural network can be present graphically (Huang, 2017):
+
+```{r out.width = '30%'}
+#Figure 2: Recurrent neural network with one hidden layer
+knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure2.png")
+```
+
+```{r out.width = '30%'}
+# Figure 3: Recurrent neural network with multiple hidden layers
+knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure3.png")
+```
+
+Nevertheless, two major challenges with a typical generic RNN are that these networks remember only a few earlier steps in the sequence and thus are not suitable to remembering longer sequences of data (Siami-Namini and Namin, 2018) and the vanishing gradient problem always influences the result of training. Therefore, long short-term memory (LSTM) as a kind of Recurrent Neural Network with the capability of memorizing longer steps in the sequence is used in order to predict time series and reduce update times.
+
+**Long Short-term memory**
+
+LSTM model is established by many special neurons that contains a memory cell with four inputs and one output. Except The input from another part of the network and the output to another part of the network, it has 3 special gates that the input gate has an activation function f to mimic opening and closing gate to control the input. It is usually a sigmoid function. The output gate contains an activation function f to mimic open and close gate to control the output. It is usually a sigmoid function. Forget gate possesses an activation function f to mimic open and close gate to decide whether to remember. It is usually a sigmoid function as well (Hochreiter and Schmidhuber, 1997). A simple and typical neuron of LSTM can be present (Huang, 2017):
+
+```{r out.width = '30%'}
+# Figure 4: A neuron of LSTM
+knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure4.png")
+```
+
+A new updated memory cell can be written: $c^{'}=g(z)f(z_i)+cf(z_f)$ and the output $a$ can be written: $a=h(c^{'})f(z_o)$, Where, $C^{t-1}$ is vector of memory cell and $C^t$ from the input is named peephole.$Z,Z^i,Z^f,Z^o$ are vectors to handle general input, input gate, forget gate and output gate respectively. $y^t$ is value of output layer and $h^t$ is value of hidden layer. Then, the LSTM network (Multiple-layer LSTM) can be present graphically (Huang, 2017):
+
+```{r out.width = '30%'}
+# Figure 5: Multiple-layer LSTM
+knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure5.png")
+```
+
+Before univariate time series can be modeled, it must be prepared. The LSTM model will learn a function that maps a sequence of past observations as input to an output observation. As such, the sequence of observations must be transformed into multiple examples from which the LSTM can learn (Brownlee, 2018). So, for a time series $x_1,x_2,...,x_T$, if the LSTM model uses 3 observations consecutive to predict next 2 observations consecutive, train data set will be prepared as:
+$$
+\{x_1,x_2,x_3\}\{x_4,x_5\} \\
+\{x_2,x_3,x_4\}\{x_5,x_6\} \\
+\{x_3,x_4,x_5\}\{x_6,x_7\} \\
+......\\
+\{x_{T-4},x_{T-3},x_{T-2}\}\{x_{T-1},x_{T}\} \\
+$$
+In this paper, the step of forecast is always unit which means that the length of output is always 1. The whole LSTM model contains 3 layers, but numbers of neurons are different for different data set in each layer. 
+
+The process of modeling Artificial neural network model is distinct from ARIMA model. Traditional statistic models often use maximum likelihood estimation to find values of parameter but ANN estimate parameter via a formula which is similar to least squares estimation. As with least squares estimation, the loss function is given: $L(w,b)=\sum _{i=1}^n(\hat y_i-(b+w_ix_i))^2$ where $\hat y_i$ and $x_i$ are real data for $i=1,2,3...,n$, $b$ is bias and $w$ is weight. In some cases, loss function is also regularized in order to solve overfitting problem and given as: $L(w,b)=\sum _{i=1}^n(\hat y_i-(b+w_ix_i))^2+ \lambda \sum_{i=i}^n(w_i)^2$, $\lambda$ is a real number. The objective of learning is to seek values of parameter that minimize the loss function: $w^*,b^*=argmin_{w,b}L(w,b)$.
+Practically, gradient descent algorithm is used to seek the local minimum point of the loss function:
+\
+1. Select initiation point $w^0$,  $b^0$ and learning rate $\eta$.
+\
+2. Compute $\left. \displaystyle \frac{\partial L}{\partial W} \right|_{w=w^0,b=b^0}$,$\left. \displaystyle \frac{\partial L}{\partial b} \right|_{w=w^0,b=b^0}$ and calculate $w^1=w^0- \eta \left. \displaystyle \frac{\partial L}{\partial W} \right|_{w=w^0,b=b^0}$, $b^1=b^0- \eta \left. \displaystyle \frac{\partial L}{\partial b} \right|_{w=w^0,b=b^0}$
+\
+3. Compute $\left. \displaystyle \frac{\partial L}{\partial W} \right|_{w=w^1,b=b^1}$,$\left. \displaystyle \frac{\partial L}{\partial b} \right|_{w=w^1,b=b^1}$ and calculate $w^2=w^1- \eta \left. \displaystyle \frac{\partial L}{\partial W} \right|_{w=w^1,b=b^1}$, $b^2=b^1- \eta \left. \displaystyle \frac{\partial L}{\partial b} \right|_{w=w^1,b=b^1}$
+\
+4. Repete the process above until $w^n$ and $b^n$ cannot be updated. Then, $w^n$ and $b^n$ are local optimal parameter for loss function. However, original gradient descent method is difficult to calculate because an ANN model usually has millions of parameters. In this situation, Backpropagation as an efficient algorithm to compute the gradient is widely used in training neural networks. Before Backpropagation is presented, the chain rule is given:
+\
+1. $y=g(x), z=h(x)$
+\
+$$
+\frac{d z}{d x}=\frac{d z}{d y}\frac{d y}{d x}
+$$
+
+2. $x=g(s), y=h(s), z=k(x,y)$
+
+$$
+\frac{d z}{d s} = \frac{\partial z}{\partial x}\frac{d x}{d s} + \frac{\partial z}{\partial y}\frac{d y}{d s}
+$$
+
+Given loss function $L(\theta)= \sum_{n=1}^NC^n(\theta)$, where $C^n(\theta)$ is the distance between forecast value and real value for n-th observation when parameters $\theta$ are used, making partial derivative for any weight $w$.
+$$
+\frac{\partial L(\theta)}{\partial w} = \sum_{n=1}^{N} \frac{\partial C^n(\theta)}{\partial w}
+$$
+If one $\frac{\partial C^n(\theta)}{\partial w}$ can be calculated, the remaining could be calculated as well. Without loss of generality, let a neuron is $z=x_1w_1+x_2w_2+b$ and figure below (Huang, 2017) shows the structure of the ANN model. Using chain rule, we get $\frac{\partial C}{\partial w} = \frac{\partial z}{\partial w}\frac{\partial C}{\partial z}$.
+```{r out.width = '30%'}
+# Figure 6: The structure of ANN
+knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure6.png")
+```
+\
+**1** $\frac{\partial z}{\partial w}$
+
+That computing $\frac{\partial z}{\partial w}$ for all parameters is named forward pass and is obvious.We can obtain $\frac{\partial z}{\partial w_1}=x_1$ and $\frac{\partial z}{\partial w_2}=x_2$.
+
+**2** $\frac{\partial C}{\partial z}$
+
+That computing $\frac{\partial C}{\partial z}$ for all activation function inputs $z$ is a little tricky. Without loss of generality, let activation function is $\sigma$ and output is $a$. Then, $a=\sigma(z)$. $\frac{\partial C}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial C}{\partial a}$.So, $\frac{\partial a}{\partial z}$ is $\sigma^{'}(z)$, where $\sigma^{'}$ is the derivative of $\sigma$.Using chain rule, $\frac{\partial C}{\partial s}=\frac{\partial z^{'}}{\partial a}\frac{\partial C}{\partial z^{'}}+\frac{\partial z^{''}}{\partial a}\frac{\partial C}{\partial z^{''}}$ and it is obvious to get that $\frac{\partial z^{'}}{\partial a}=w_3$ and $\frac{\partial z^{''}}{\partial a}=w_4$.Assumed $\frac{\partial C}{\partial z^{'}}$ and $\frac{\partial C}{\partial z^{''}}$ are known, we get $\frac{\partial C}{\partial z}=\sigma^{'}(z)\left[w_3\frac{\partial C}{\partial z^{'}}+w_4\frac{\partial C}{\partial z^{''}}\right]$. $\sigma^{'}(z)$ is a constant because z is already determined in the forward pass.
+
+**Case 1. Output layer  (Huang, 2017)**
+
+```{r out.width = '30%'}
+# Figure 7: Output layer
+knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure7.png")
+```
+
+$$
+\frac{\partial C}{\partial z^{'}}=\frac{\partial y_1}{\partial z^{'}}\frac{\partial C}{\partial y_1} \\
+\frac{\partial C}{\partial z^{''}}=\frac{\partial y_1}{\partial z^{''}}\frac{\partial C}{\partial y_1}
+$$
+Done. 
+
+**Case 2: Not Output layer (Huang, 2017)**
+
+```{r out.width = '30%'}
+# Figure 8: Not output layer
+knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure8.png")
+```
+
+$\frac{\partial C}{\partial z^{'}}=\sigma^{'}(z^{'})\left[w_5\frac{\partial C}{\partial z_{a}}+w_6\frac{\partial C}{\partial z_{b}}\right]$, if we can know $\frac{\partial C}{\partial z_{a}}$ and $\frac{\partial C}{\partial z_{b}}$. Compute $\frac{\partial C}{\partial z_{z}}$ recursively until we reach the case 1 that we can know $\frac{\partial C}{\partial z_{a}}$ and $\frac{\partial C}{\partial z_{b}}$.Done. 
+
+So, 1’ and 2’ let us know that we can start from the output layer and calculate the partial derivative until the input layer. All other ANN models with different structures or distinct definitions of the loss function cannot influence this process; the only change is the path and the formula to calculate the derivative. This process is Backpropagation.
+
+**Adam Optimization Algorithm**
+
+Adam Optimization Algorithm is used instead of the classical stochastic gradient descent to update network weights iterative based in training data. In some cases, Adam with Nesterov momentum is also used as the optimizer derives from Adam. The Adam optimization algorithm is an extension to stochastic gradient descent that has recently seen broader adoption for deep learning applications in computer vision and natural language processing (Brownlee, 2017). Briefly speaking, Adam is combined by the momentum method and the RMSprop method.
+
+RMSprop is a more dynamic method to update parameters and it is more useful than basic method because error surface can be very complex when a real ANN model is trained. Like gradient descent algorithm mentioned above, first we give initiation point $w^{0}$, $b^{0}$ and learning rate $\eta$. We note the value of gradient for  $w$ at $t$-th iteration is $g^{t}$ and a new parameter $\sigma_{t}$ at $t$-th iteration. The process of updating is:
+$$
+W^{1} = W^{0} - \frac{\eta}{\sigma^0} g^{0}, \sigma^0=g^0 \\
+W^{2} = W^{1} - \frac{\eta}{\sigma^1} g^{1}, \sigma^1=\sqrt{\alpha(\sigma^0)^2+(1-\alpha)(g^1)^2} \\
+W^{3} = W^{2} - \frac{\eta}{\sigma^2} g^{2}, \sigma^2=\sqrt{\alpha(\sigma^1)^2+(1-\alpha)(g^2)^2}\\
+......\\
+W^{t+1} = W^{t} - \frac{\eta}{\sigma^t} g^{t}, \sigma^t=\sqrt{\alpha(\sigma^{t-1})^2+(1-\alpha)(g^t)^2}
+$$
+Where $\alpha$ is the weight given by researchers. Similarly, the process of updating $b$ is the same. 
+
+Momentum also is a method for updating parameters. This method considers the movement from past gradient like physical inertia in order to solve the problem of sticking at plateau, saddle point or local minima. The next movement will not only base on gradient but be the movement of last step minus gradient at present. We start at the initial point $\theta^0$ and note the direction of the last movement at the $t$-th iteration is $v^t$ which actually is the weighted sum of all the previous gradient. The process can be written: 
+
+**I** Start at $\theta^0$, movement $v^0=0$. compute gradient of loss function $\nabla L(\theta^0)$ at $\theta^0$ and calculate the movement $v^1=\lambda v^0 - \eta \nabla L(\theta^0)$. Then, move to $\theta^1=\theta^0 + v^1$. 
+
+**II** Start at $\theta^1$, movement $v^1$. compute gradient of loss function $\nabla L(\theta^1)$ at $\theta^1$ and calculate the movement $v^2=\lambda v^1 - \eta \nabla L(\theta^1)$. Then, move to $\theta^2=\theta^1 + v^2$.
+
+**III** Repeat the process above until stop training. 
+\
+A simple and clear Adam algorithm is given by Kingma and Ba (2014):
+
+```{r out.width = '30%'}
+# Figure 9: Adam algorithm
+knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure9.png")
+```
+
+Where $m_0$ is the last movement for momentum method, $v_0$ is the $\sigma$ for RMSprop method.
+
+In practice, the activation function is Rectified Linear Unit (ReLU) rather than sigmoid because using ReLU can avoid Vanishing gradient problem (Huang, 2017) and the loss function is Mean Square Error (MSE). Given their definitions as the following:
+
+**Mean Square Error (MSE)**
+
+In machine learning, MSE is also named mean square error which is one type of loss function. Given n observations $Y_1,Y_2,...,Y_n$ and their predictive values $\hat Y_1,\hat Y_2,...,\hat Y_n$. 
+$$
+MSE = \frac{1}{n} \sum_{i=1}^{n}(Y_i-\hat Y_i)^2
+$$
+$Rectified Linear Unit (ReLU)$
+ReLU is an activation function which has strong biological and mathematical underpinning. In 2011, it was demonstrated to further improve training of deep neural networks. It works by thresholding values at 0, i.e. $f(x)=max(0,x)$ Simply put, it outputs $0$ when $x < 0$, and conversely, it outputs a linear function when $x ≥ 0$ (Agarap, 2018: 2). 
+
+This report uses Keras to create and train ANN models. In Keras, computers do not really minimize total loss. However, it randomly separates train data into several mini-batch and calculates loss value in each batch. The whole process is: 
+\
+1.Randomly initialize network parameters.
+\
+2.Pick the first batch and calculate the total loss in this batch. Update parameters once base on this total loss.
+\
+3.Pick the second batch and calculate the total loss in this batch. Update parameters once base on this total loss.
+\
+4.Repeat process 2 and 3 until all mini-batches have been picked. 
+\
+This process is named one epoch. In keras, it needs to repeat several epochs to get appropriate parameters. General speaking, batch size, and the number of epochs for training are tuned by researchers as well. The process of diagnosis Artificial neural network model is simple. The only thing to note is the problem of overfitting which will cause the model to have the best result in the train set but not in the test set. Therefore, the length of input and parameter of Dropout function which is a technique where randomly selected neurons are ignored during training (Brownlee, 2016a) are tuned manually to avoid the overfitting problem.
+
+In our case, we select one hidden layer bidirectional neural network with 200 nods. The activation function is relu and optimizer is 'adam' with loss function using mse.We also drop 20 percent nods to avoid the overfitting. epochs is 200 with 10 records of validation data.The final observation in data set as test set.For each training, we only selected their performance is less than 0.02 which means the absolute value of difference between predicted value and true value is less than 0.02.For each country, we predicted 30 times in test process for calculate their RMSE which is defined by square root of MSE.We also collected the end date where transmission rate is no lager than 0. The maximum end date is 48 weeks which is almost one year.Finally, we will fixed the CFR and number of fully vaccinated as the last record for each out sample prediction.
+
+**Python code: LSTM**
+
+```
+def count_endpoint(pre):
+    aux = 0
+    for i in y_predend:
+        if i > 0:
+            aux = aux + 1
+        else:
+            break
+    return aux         
+
+def predict(model, x_Input,cfr_input, pfv_input, N_steps_in, N_features, num_predi):
+    result = []
+    for i in range(num_predi):
+        data = array(x_Input)
+        datau = np.append(data,  array(cfr_input))
+        datau = np.append(datau, array(pfv_input))
+        datau = datau.reshape((1, N_steps_in, N_features))
+        predicted = model.predict(datau, verbose=0)
+        result.append(predicted[0][0])
+        x_Input = x_Input[1:]
+        x_Input.append(predicted[0][0])
+        datau = []
+    return result
+
+def predict_end_u(model, x_Input, N_steps_in, N_features, num_predi):
+    result = []
+    for i in range(num_predi):
+        data = array(x_Input)
+        datau = np.append(data,  array([[0.287071,0.287071]]))
+        datau = np.append(datau, array([[0.173468,0.173468]]))
+        datau = datau.reshape((1, N_steps_in, N_features))
+        predicted = model.predict(datau, verbose=0)
+        result.append(predicted[0][0])
+        x_Input = x_Input[1:]
+        x_Input.append(predicted[0][0])
+        datau = []
+    return result
+
+def predict_end_s(model, x_Input, N_steps_in, N_features, num_predi):
+    result = []
+    for i in range(num_predi):
+        data = array(x_Input)
+        datau = np.append(data,  array([[0.30535,0.30535]]))
+        datau = np.append(datau, array([[1.85592,1.85592]]))
+        datau = datau.reshape((1, N_steps_in, N_features))
+        predicted = model.predict(datau, verbose=0)
+        result.append(predicted[0][0])
+        x_Input = x_Input[1:]
+        x_Input.append(predicted[0][0])
+        datau = []
+    return result
+
+def predict_end_c(model, x_Input, N_steps_in, N_features, num_predi):
+    result = []
+    for i in range(num_predi):
+        data = array(x_Input)
+        datau = np.append(data,  array([[0.111194,0.111194]]))
+        datau = np.append(datau, array([[1.92078,1.92078]]))
+        datau = datau.reshape((1, N_steps_in, N_features))
+        predicted = model.predict(datau, verbose=0)
+        result.append(predicted[0][0])
+        x_Input = x_Input[1:]
+        x_Input.append(predicted[0][0])
+        datau = []
+    return result
+
+
+def plotResults(yhat, y, num_obser):
+    raw_seq_x = range(1, num_obser + 1)
+    raw_seq_y = y[0:num_obser]
+    raw_seq_pre = yhat[0:num_obser]
+    plt.plot(raw_seq_x, raw_seq_y)
+    plt.plot(raw_seq_x, raw_seq_pre)
+    plt.show()
+    
+    
+# split a univariate sequence into samples
+def split_sequence(sequence,n_steps_in, n_steps_out):
+    X, y = list(), list()
+    for i in range(len(sequence)):# find the end of this pattern
+        end_ix = i + n_steps_in
+        out_end_ix = end_ix + n_steps_out
+        # check if we are beyond the sequence
+        if out_end_ix > len(sequence):
+            break
+        # gather input and output parts of the pattern
+        seq_x, seq_y = sequence[i:end_ix], sequence[end_ix:out_end_ix]
+        X.append(seq_x)
+        y.append(seq_y)
+        
+    return array(X), array(y)
+
+# split a univariate sequence into train data and test data
+def train_test_sep(sequence, n):
+    train_data, test_data = list(), list()
+    train_data = sequence.iloc[0:(len(sequence)-n)]
+    test_data  = sequence.iloc[(len(sequence) -n):len(sequence)]
+    return train_data, test_data
+
+# Root Mean Squared Error 
+def root_mean_squared_error(y_true, y_pred): 
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return (np.mean((y_true - y_pred)**2))**(1/2)
+
+aux_rmse_u,aux_endp_u = [], []
+for i in range(30):   
+    y_pred = [10] 
+    while (y_pred[0] - float(test_set['transmission_rate'])) > 0.02: 
+        train_set, test_set = train_test_sep(df_u, 1)
+        # choose a number of time steps
+        n_steps_in, n_steps_out = 2, 1
+
+        # split into samples
+        train_tr, test_tr = split_sequence(train_set['transmission_rate'],n_steps_in, n_steps_out)
+        train_cfr, test_cfr = split_sequence(train_set['case_fatality_rate'],n_steps_in, n_steps_out)
+        train_pfv, test_pfv = split_sequence(train_set['people_fully_vaccinated'],n_steps_in, n_steps_out)
+        train_aux = np.append(train_tr, train_cfr, axis=1)
+        X = np.append(train_aux, train_pfv, axis=1)
+        y = test_tr
+
+        # summarize the data
+        # for i in range(len(X)):
+        #print(X[i], y[i])
+
+
+        # reshape from [samples, timesteps] into [samples, timesteps, features]
+        n_features = 1
+        X = X.reshape((X.shape[0], X.shape[1], n_features))
+
+        # define model
+        model = Sequential()
+        model.add(Bidirectional(LSTM(200, activation='relu'), input_shape=(n_steps_in*3, n_features)))
+        model.add(Dropout(0.2))
+        model.add(Dense(n_steps_out))
+        model.compile(optimizer='adam', loss='mse')
+
+        # weights = model.layers[0].get_weights()[0]
+        # biases = model.layers[0].get_weights()[1]
+        # fit model
+        model.fit(X, y, epochs=200, verbose=0, validation_split=0.05)
+        # prediction for RMSE
+        t_set = list(train_set['transmission_rate'])
+        cfr = train_set['case_fatality_rate'][(len(t_set) -n_steps_in):len(t_set)]
+        pfv = train_set['people_fully_vaccinated'][(len(t_set) -n_steps_in):len(t_set)]
+        x_input = t_set[(len(t_set) -n_steps_in):len(t_set)]
+        y_pred = predict(model, x_input,cfr,pfv, n_steps_in*3, n_features, 1)
+    # prediction for Endpoints
+    t_set = list(df_u['transmission_rate'])
+    x_input = t_set[(len(t_set) -n_steps_in):len(t_set)]
+    y_predend = predict_end_u(model, x_input, n_steps_in*3, n_features, 48)
+    print(i, y_pred)
+    aux_endp_u.append(count_endpoint(y_predend))
+    aux_rmse_u.append(y_pred)
+
+aux_rmse_s,aux_endp_s = [], []
+for i in range(30):   
+    y_pred = [10] 
+    while (y_pred[0] - float(test_set['transmission_rate'])) > 0.02: 
+        train_set, test_set = train_test_sep(df_s, 1)
+        # choose a number of time steps
+        n_steps_in, n_steps_out = 2, 1
+
+        # split into samples
+        train_tr, test_tr = split_sequence(train_set['transmission_rate'],n_steps_in, n_steps_out)
+        train_cfr, test_cfr = split_sequence(train_set['case_fatality_rate'],n_steps_in, n_steps_out)
+        train_pfv, test_pfv = split_sequence(train_set['people_fully_vaccinated'],n_steps_in, n_steps_out)
+        train_aux = np.append(train_tr, train_cfr, axis=1)
+        X = np.append(train_aux, train_pfv, axis=1)
+        y = test_tr
+
+        # summarize the data
+        # for i in range(len(X)):
+        #print(X[i], y[i])
+
+
+        # reshape from [samples, timesteps] into [samples, timesteps, features]
+        n_features = 1
+        X = X.reshape((X.shape[0], X.shape[1], n_features))
+
+        # define model
+        model = Sequential()
+        model.add(Bidirectional(LSTM(200, activation='relu'), input_shape=(n_steps_in*3, n_features)))
+        model.add(Dropout(0.1))
+        model.add(Dense(n_steps_out))
+        model.compile(optimizer='adam', loss='mse')
+
+        # weights = model.layers[0].get_weights()[0]
+        # biases = model.layers[0].get_weights()[1]
+        # fit model
+        model.fit(X, y, epochs=200, verbose=0, validation_split=0.05)
+        # prediction for RMSE
+        t_set = list(train_set['transmission_rate'])
+        cfr = train_set['case_fatality_rate'][(len(t_set) -n_steps_in):len(t_set)]
+        pfv = train_set['people_fully_vaccinated'][(len(t_set) -n_steps_in):len(t_set)]
+        x_input = t_set[(len(t_set) -n_steps_in):len(t_set)]
+        y_pred = predict(model, x_input,cfr,pfv, n_steps_in*3, n_features, 1)
+    # prediction for Endpoints
+    t_set = list(df_u['transmission_rate'])
+    x_input = t_set[(len(t_set) -n_steps_in):len(t_set)]
+    y_predend = predict_end_s(model, x_input, n_steps_in*3, n_features, 48)
+    print(i, y_pred)
+    aux_endp_s.append(count_endpoint(y_predend))
+    aux_rmse_s.append(y_pred)
+
+aux_rmse_c,aux_endp_c = [], []
+for i in range(30):   
+    y_pred = [10] 
+    while (y_pred[0] - float(test_set['transmission_rate'])) > 0.02: 
+        train_set, test_set = train_test_sep(df_c, 1)
+        # choose a number of time steps
+        n_steps_in, n_steps_out = 2, 1
+
+        # split into samples
+        train_tr, test_tr = split_sequence(train_set['transmission_rate'],n_steps_in, n_steps_out)
+        train_cfr, test_cfr = split_sequence(train_set['case_fatality_rate'],n_steps_in, n_steps_out)
+        train_pfv, test_pfv = split_sequence(train_set['people_fully_vaccinated'],n_steps_in, n_steps_out)
+        train_aux = np.append(train_tr, train_cfr, axis=1)
+        X = np.append(train_aux, train_pfv, axis=1)
+        y = test_tr
+
+        # summarize the data
+        # for i in range(len(X)):
+        #print(X[i], y[i])
+
+
+        # reshape from [samples, timesteps] into [samples, timesteps, features]
+        n_features = 1
+        X = X.reshape((X.shape[0], X.shape[1], n_features))
+
+        # define model
+        model = Sequential()
+        model.add(Bidirectional(LSTM(200, activation='relu'), input_shape=(n_steps_in*3, n_features)))
+        model.add(Dropout(0.2))
+        model.add(Dense(n_steps_out))
+        model.compile(optimizer='adam', loss='mse')
+
+        # weights = model.layers[0].get_weights()[0]
+        # biases = model.layers[0].get_weights()[1]
+        # fit model
+        model.fit(X, y, epochs=200, verbose=0, validation_split=0.05)
+        # prediction for RMSE
+        t_set = list(train_set['transmission_rate'])
+        cfr = train_set['case_fatality_rate'][(len(t_set) -n_steps_in):len(t_set)]
+        pfv = train_set['people_fully_vaccinated'][(len(t_set) -n_steps_in):len(t_set)]
+        x_input = t_set[(len(t_set) -n_steps_in):len(t_set)]
+        y_pred = predict(model, x_input,cfr,pfv, n_steps_in*3, n_features, 1)
+    # prediction for Endpoints
+    t_set = list(df_u['transmission_rate'])
+    x_input = t_set[(len(t_set) -n_steps_in):len(t_set)]
+    y_predend = predict_end_c(model, x_input, n_steps_in*3, n_features, 48)
+    print(i, y_pred)
+    aux_endp_c.append(count_endpoint(y_predend))
+    aux_rmse_c.append(y_pred)
+    
+fore_s = {'RMSE':aux_rmse_s,
+        'End Date':aux_endp_s,
+        'Country':['Spain' for i in range(len(aux_rmse_s))]
+           }
+fore_c = {'RMSE':aux_rmse_c,
+        'End Date':aux_endp_c,
+        'Country':['Canada' for i in range(len(aux_rmse_s))]
+           }
+fore_u = {'RMSE':aux_rmse_u,
+        'End Date':aux_endp_u,
+        'Country':['US' for i in range(len(aux_rmse_s))]
+           }
+f_s = pd.DataFrame(fore_s)
+f_c = pd.DataFrame(fore_c)
+f_u = pd.DataFrame(fore_u)
+
+df_a = pd.concat([f_u, f_c])
+df_p = pd.concat([df_a, f_s]) 
+df_p.to_csv('result_data.csv',index=False)
+```
+**Forecasting results**
+
+```{r echo=FALSE}
+library(gplots)
+options(repr.plot.width=35, repr.plot.height=30)
+par(mfrow=c(1,1))
+
+result <- read_csv("./result_data.csv")
+result$Country <- as.factor(result$Country)
+
+attach(result)
+# Basic box plot
+p <- ggplot(result, aes(x=Country, y=`End Date`, fill=Country)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8,
+                outlier.size=4) + 
+  labs(title="Plot 2: Boxplot of Country",x="Country", y = "End date")
+p + stat_summary(fun.y=mean, geom="point", shape=2, size=3)
+
+
+# Main effect plot.
+plotmeans(`End Date`~Country,xlab="Country",ylab="End date",
+          main="Plot 3: Main  effect, Country",cex.lab=1.5) 
+
+# Basic box plot
+p <- ggplot(result, aes(x=Country, y=RMSE, fill=Country)) + 
+  geom_boxplot(outlier.colour="red", outlier.shape=8,
+                outlier.size=4) + 
+  labs(title="Plot 2: Boxplot of Country",x="Country", y = "RMSE")
+p + stat_summary(fun.y=mean, geom="point", shape=2, size=3)
+
+
+# Main effect plot.
+plotmeans(RMSE~Country,xlab="Country",ylab="RMSE",
+          main="Plot 3: Main  effect, Country",cex.lab=1.5) 
+
+```
+**Comparison** 
+
+For the comparison of end date, one-way ANOVA model with balance design is used. In this project, the model can be defined as follows:
+\
+According to the information of data set, we set US(1), Canada(2), Spain(3) as 3 levels of factor Country respectively.Let $\mu=\sum_{i=1}^3 w_i \mu_i$ and $\alpha_i = \mu_i -\mu$. Then $\sum_{i=1}^3 w_i \alpha_i=0$.
+the one-way ANOVA model is given as:
+\
+**Factor effect form**
+
+$$
+Y_{ij}=\mu+\alpha_i+\epsilon_{ij}, 
+$$
+where $\{\epsilon_{ij}\}$ are i.i.d. $N(0,\sigma^2)$. 
+\
+$i=1,2,3$, ${\rm 1=Canada, \ 2=Spain, \ 3 = US}$
+\
+$j = n_1, n_2, n_3 =30$
+\
+Note: For one-way ANOVA,  $w_i=\frac{n_i}{n_T}=\frac{1}{3}$. 
+
+
+ANOVA table contains the sum of squares decomposition part and their degree of freedom.SSTR is the sum of squares between different occupation which can be thought as inter-group variation. In this model, SSTR is given by $\sum_{i=1}^3 n_i \big(\bar{Y}_{i\cdot}-\bar{Y}_{\cdot \cdot}\big)^2$, and SSE is the sum of squares within each occupation which is given by $\sum_{i=1}^3 \sum_{j=1}^{n_i} \big(Y_{ij}-\bar{Y}_{i \cdot}\big)^2$ in this model. SSTO is the sum of SSTR and SSE as the total variation of our model. Degree of freedom shows values that have the freedom to vary for SSTR and SSE.each mean sum of squares is defined as sum of squares diveded by its degree of freedom. It also contains F-statistics for the F-test which with the null hypotesis $\alpha_1 = \alpha_2=\alpha_3=0$, p value is obtained at the significance level $\alpha=0.05$ for this F test. Basically, ANOVA table contains main statistical information for ANOVA model.  
+
+The null hypothesis is existing a association between `Country` and `End date` means each mean of end date are not equal and some country have longer pandemic period on average. Meanwhile, if the mean of end date in each country are not significantly different, we may believe that there is no association between `Country` and `End date`.So, our null hypotheses is $\alpha_1 = \alpha_2=\alpha_3=0$ and our alternative hypotheses is ${\rm not \ all\ } \alpha_i\ {\rm are\ the\ same}.$
+$$
+H_0: \alpha_1 = \alpha_2=\alpha_3= 0 \\
+H_1: {\rm not \ all\ } \alpha_i\ {\rm are\ the\ same}.
+$$
+\
+Following the model and the cochran's theory, we can konw that $E(MSE)=\sigma^2$ and $E(MSTR) = \sigma^2 + \frac{\sum_{i=1}^{r} n_i\alpha_i^2}{r-1}$. By the generalized fisher theory, we also know that $F^*=\frac{MSTR}{MSE}$ follows a F distribution with degree of freedom $(r-1, n_T - r)$. Then, under the null hypotheses, there is no different between $E(MSE)$ and $E(MSTR)$ which means our $F^*$ should be small. Chosen the significance level $\alpha$ and we can get the reject region RR = $\lbrace F^* > F_{r-1,n_T -r,1-\alpha} \rbrace$.In this case, we choose $\alpha = 0.05$ and get the p value by using R.For checking the result, we can get $F_{r-1,n_T -r,1-\alpha}$ to compare it with F-statistics.
+\
+
+```{r}
+attach(result)
+library(stats)
+sig.level=0.05;
+result$`End Date` <- result$`End Date` + 1 # for box_cox
+anova.fit <- aov(log(`End Date`)~Country, data=result)
+summary(anova.fit)
+
+# Our threshold to reject null hypoteses. 
+qf(0.95, 2, 87)
+
+# If F* in reject region. 
+53.70 > qf(0.95, 2, 87)
+
+# Visualization of critical value, rejection region for F-test
+r=3;n=87;alpha=0.05;
+x.grid=seq(from=1e-5,to=6,length.out=1000);
+density.grid=df(x=x.grid, df1=r-1, df2=n-r)
+critical.value=qf(1-alpha,df1=r-1,df2=n-r);
+plot(density.grid~x.grid,type='l',xlab="Value of F-stat",ylab="Density",lwd=3,xlim=c(0,6),ylim=c(0,0.8))
+abline(v=critical.value,lwd=3,col='red')
+segments(x0=critical.value,x1=10,y0=0,y1=0,lwd=3,col="orange")
+points(x=critical.value,y=0,pch=16,col="orange",cex=2)
+legend(x=3.8,y=0.8,legend=c(paste0('Critical value ', round(critical.value,digits=2)), 'Rejection region'),lty=1,lwd=3,col=c('Red','Orange'))
+
+```
+\
+The ANOVA table shows that p value is equal to 0 and F-statistics is in the reject region as well that means we reject the null hypotheses at the significance level $0.05$. So, we believe that there is association between `Country` and `End date`. For knowing the specific association or if we want to know which Country is the last country ends pandemic , we need further analysis.  
+\
+
+We have already known that there is any association between `Country` and `End date` and basis on assuming that the assumptions are true.We first order $\bar Y_{i \cdot}$ from the largest to the smallest, US is the occupation where the mean end date is the highest. We use the simultaneous inference to support and check the statement.Our data is balanced, the largest different between $n_i$ is $30.53333$ for $i =1,2,3$) so Tukey method is appropriate.
+\
+We first get the $\bar{Y}_{i\cdot}$ for all $i =1,2,3$
+```{r}
+(means = tapply(result$`End Date`, result$Country, mean))
+```
+\
+
+**Tukey method**
+\
+Tukey-Kramer method. This approach works for pairwise comparisons, e.g., $\mu_i -\mu_{i'}$. The $100(1-\alpha)\%$ confidence interval for $\{\mu_i-\mu_{i'}: i, i' \in \{1,\ldots, r\}, i\neq i'\}$ is 
+$$
+\bar{Y}_{i\cdot} - \bar{Y}_{i' \cdot} \mp T s\big( \bar{Y}_{i\cdot} -\bar{Y}_{i'\cdot} \big), \ i\neq i', \ T=\frac{1}{\sqrt{2}} q(1-\alpha; r, n_T-r), 
+$$
+where $q$ is the studentized range distribution. The coverage is exactly $1-\alpha$ for a balanced ANOVA model, and at least $1-\alpha$ for unbalanced cases. 
+\
+```{r}
+
+# Spain vs Canada
+alpha= 0.05; 
+diff21 = means[2] - means[1];
+T.stat=qtukey(1-alpha, nmeans=length(anova.fit$coefficients), df=anova.fit$df.residual)/sqrt(2);
+diff21 > T.stat
+
+# US vs Canada
+alpha= 0.05; 
+diff31 = means[3] - means[1];
+T.stat=qtukey(1-alpha, nmeans=length(anova.fit$coefficients), df=anova.fit$df.residual)/sqrt(2);
+diff31 > T.stat
+
+# US vs Spain
+alpha= 0.05; 
+diff32 = means[3] - means[2];
+T.stat=qtukey(1-alpha, nmeans=length(anova.fit$coefficients), df=anova.fit$df.residual)/sqrt(2);
+diff32 > T.stat
+```
+
+\
+In conclusion, we get the same result using Tukey methods and it infers that we can statistically conclude that US which the mean end date is the highest at significant level 0.05.
+\
+
+# Sensitivity analysis {-}
+The part of Sensitivity analysis focus on 2 part. One of part is for ANN, the other one is for Comparison. In previous, RMSE is applied for assess the model.It is a very useful key performance indicator (KPI) but not enough to prove the accuracy in this case. Especially when we want to know the difference of forecast ability in each different model because when the accuracy in these 3 countries are significant difference, it is nonsensical to compare the forecasting results in these countries directly because each training model reaches the optimal point but not the global optimal point. Due to the significant of comparing results, one-way ANOVA model is used to compare the accuracy of forecasting results in these 3 countries first.Once there is no significant difference in errors among these countries. Then, it indicates us to conclude that the forecast ability are same. Then, the comparing the end times of the epidemic in these countries is processed reasonably.
+
+**RMSE**
+The method is Same as before in Comparison part,only the outcomes is RMSE rather than end date,
+
+```{r}
+anova.fit <- aov(RMSE~Country, data=result)
+summary(anova.fit)
+
+# Our threshold to reject null hypoteses. 
+qf(0.95, 2, 87)
+
+# If F* in reject region. 
+9.271 > qf(0.95, 2, 87)
+
+# Visualization of critical value, rejection region for F-test
+r=3;n=87;alpha=0.05;
+x.grid=seq(from=1e-5,to=6,length.out=1000);
+density.grid=df(x=x.grid, df1=r-1, df2=n-r)
+critical.value=qf(1-alpha,df1=r-1,df2=n-r);
+plot(density.grid~x.grid,type='l',xlab="Value of F-stat",ylab="Density",lwd=3,xlim=c(0,6),ylim=c(0,0.8))
+abline(v=critical.value,lwd=3,col='red')
+segments(x0=critical.value,x1=10,y0=0,y1=0,lwd=3,col="orange")
+points(x=critical.value,y=0,pch=16,col="orange",cex=2)
+legend(x=3.8,y=0.8,legend=c(paste0('Critical value ', round(critical.value,digits=2)), 'Rejection region'),lty=1,lwd=3,col=c('Red','Orange'))
+
+anova.fit <- aov(`End Date`~Country, data=result)
+# Studentized residuals, histogram 
+residuals.std = rstudent(anova.fit)
+hist(residuals.std)
+
+# Plot the Studentized residuals against fitted values
+plot(residuals.std~anova.fit$fitted.values,type='p',pch=16,cex=1.5,xlab="Fitted values",ylab="Residuals.std")
+abline(h=0)
+(vars = tapply(residuals.std, result$Country,mean))
+alpha=0.05;
+
+# QQ-plot 
+qqnorm(residuals.std);qqline(residuals.std)
+
+# Calculate the variances for each group
+(vars = tapply(result$`End Date`, result$Country,var))
+alpha=0.05;
+
+# Levene test
+result$res.abs=abs(anova.fit$residuals);
+summary(aov(res.abs~Country,data=result))
+
+```
+\
+The ANOVA table shows that p value is equal to 0.000608 and F-statistics is in the reject region as well that means we do not reject the null hypotheses at the significance level $0.0005$. So, we believe that 3 model have the same ability to predict, though the significance level is small.
+
+
+**End Date**
+\
+We made the assumption that $\{\epsilon_{ij}\}$ are i.i.d. $N(0,\sigma^2)$ for the one-way ANOVA model.Now, let's use Studentized residuals for diagnostics. Generally, we need to check the normality and the homoscedasticity of variance. 
+
+```{r}
+
+anova.fit <- aov(`End Date`~Country, data=result)
+# Studentized residuals, histogram 
+residuals.std = rstudent(anova.fit)
+hist(residuals.std)
+
+# Plot the Studentized residuals against fitted values
+plot(residuals.std~anova.fit$fitted.values,type='p',pch=16,cex=1.5,xlab="Fitted values",ylab="Residuals.std")
+abline(h=0)
+(vars = tapply(residuals.std, result$Country,mean))
+alpha=0.05;
+
+# QQ-plot 
+qqnorm(residuals.std);qqline(residuals.std)
+
+# Calculate the variances for each group
+(vars = tapply(result$`End Date`, result$Country,var))
+alpha=0.05;
+
+# Levene test
+result$res.abs=abs(anova.fit$residuals);
+summary(aov(res.abs~Country,data=result))
+
+boxcox(anova.fit) # chose log transformation. 
+```
+*** 
+\
+We found that the qq-plot indicate heavy tail, normality does not be hold. The plot Studentized residuals against fitted values shows that the variance in each occupation may not be equal and the mean of Studentized residuals are 0. Result of Levene test leads us to reject the homoscedasticity of variance at significant level 0.05. All in all, our one way ANOVA model is lack normality and homoscedasticity of variance in each Country, we need to make data transformation, in this case, Box-cox transformation could be thought.  
+\
+
+# Discussion {-}
+
+Even though we can get the forecasting end date, there are a lot of assumptions may can not be satisfied. Especially, assumptions that all COVID-19 patients have no chance to infect others and fixed the CFR and number of fully vaccinated as the last record for each out sample prediction.The causality part could not be proved because the inverse prediction for the future can not be accomplished. It also should be noted that we assumed that there is no new variant in the future but the truth is COVID-19 virus has high probability to vary. In the future research, these problems will be crucial topic to discuss. The first task is quantify the chance of variation and the effect of measures. Moreover, in this project,only one layer LSTM is used and it may not enough to get better forecasting results. researcher could still research mre efficient neural networks and applied it into COVID-19 forecasting.In addition, weekly data in use caused the loss of information and mean as summary measures may be very sensitive to the outliers.Researcher can try the more robust summary measures like median and 3 days frequent data as well.
+
+# Conclusion {-}
+In conclusion.First, US is still face the pandemic in the next 8 months.But LSTM model predict that the pandemic will end in short period in Canada and Spain. In detail, we predict that the transmission rate will arrive 0 within 3 weeks in Canada.The transmission rate will arrive 0 within 3.06 weeks in Spain.However, it takes 33.53 weeks which is close to 8 months to arrive 0 in US.Second, not finish, more conclusion will be applied, I will train the model not only 30 times but 100 times.
+
+
+# References {-}
+
+Ushey, Kevin, JJ Allaire, and Yuan Tang. 2022. Reticulate: Interface to Python.
+\
+\
+Huang, y. (2017): Build Software Better, Together. Available at: https://github.com/topics/hung-yi-lee [Accessed 22 June 2020].
+\
+\
+Chen, Y., Lin, Y., Kung, C., Chung, M. and Yen, I. (2019): “Design and Implementation of Cloud Analytics-Assisted Smart Power Meters Considering Advanced Artificial Intelligence as Edge Analytics in Demand-Side Management for Smart Homes”, Sensors, 19(9), p. 2047. DOI: 10.3390/s19092047.
+\
+\
+Hastie, T., Tibshirani, R., & Friedman, J. (2009): The elements of statistical learning: data mining, inference, and prediction, New York, Springer Science & Business Media.
+\
+\
+Siami-Namini, S. and Namin, A. S. (2018): “Forecasting economics and financial time series: ARIMA vs. LSTM”, arXiv preprint arXiv:1803.06386.
+\
+\
+Hochreiter, S. and Schmidhuber, J. (1997): “Long Short-Term Memory,” Neural Computation, 9(8), pp.1735-1780. DOI: 10.1162/neco.1997.9.8.1735.
+\
+\
+Brownlee, J. (2018): How to Develop LSTM Models for Time Series Forecasting. [online] Machine Learning Mastery. Available at: https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/ [Accessed 22 June 2020].
+\
+\
+Kingma, D. P., & Ba, J. (2014):” Adam: A method for stochastic optimization”, arXiv preprint arXiv:1412.6980.
+\
+\
+Brownlee, J. (2016a): Dropout Regularization in Deep Learning Models with Keras. [online] Machine Learning Mastery. Available at: https://machinelearningmastery.com/dropout-regularization-deep-learning-models-keras/ [Accessed 22 June 2020].
+\
+\
+Agarap, A. F. (2018):” Deep learning using rectified linear units (relu)”, arXiv preprint arXiv:1803.08375.
+\
+\
+(https://www.who.int/emergencies/diseases/novel-coronavirus-2019/situation-reports) for reference. Vaccination data in https://ourworldindata.org/covid-vaccinations. 
+
+
+# Session info {-}
+
+<span style='color:blue'>
+Report information of your `R` session for reproducibility. 
+</span> 
+
+```{r}
+sessionInfo()
+```
+
+
