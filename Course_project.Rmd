@@ -6,7 +6,7 @@ output: html_document
 
 # Introduction {-}
 
-Since the beginning of 2020, an outbreak of a pandemic disease started in the world.On the one hand, all communities was working together to against COVID-19. On the other hand, with the invention of the COVID-19 vaccine and the implementation of various pandemic prevention measures such as facial coverings and closure of schools, people are beginning to look forward to the endpoint of the pandemic. Although the Omicron variant makes the endpoint unpredictable again, we still want to know when the world will get back normal. Fortunately, Recurrent Neural Network in machine learning provides a feasible solution for forecasting this endpoint, especially since all data related to COVID-19 are time sequence, and the more recent pandemic situation will have a greater impact on the future pandemic situation, the long short-term memory model can be considered appropriately.Moreover, compared with ARIMA model, the process of modeling the ANN model is easier. Generally, basic RNN structure and internal structure of LSTM are given by researchers including deciding the number of hidden layers and number of memory cells. Furthermore, in the process of training the recurrent neural network, gradient descent algorithm and Backpropagation method are used. In addition, Programming trained the ANN model automatically and parameters were obtained automatically as well. Then, analysis of variance method like ANOVA is considered for comparison of endpoint among countries. Overall, this report aims to forecasting of COVID-19 endpoint in United States, Canada, Spain using LSTM networks and comparing predicted endpoint among these 3 countries whether they are significant different basis on the forecasting results.We want to predict the possible endpoint of COVID-19 pandemic in each country with the assumption that new variant will not appear in the future. It also help and as a reference for people to make decision such that government makes polices or university decides if take course in-person, etc. We will explore the WHO COVID-19 data from the WHO office website and vaccination data from website Ourworldindata in this project.The data of both websites are authentic and reliable data that has been officially confirmed.The report is organized as follows. Section 2 reviews the background of the COVID-19 pandemic.Section 3 explores the dataset and gives the process of features building. Section 4 introduces the background of RNN and LSTM models used, assumptions stated in this report. Section 5 contains model fitting including the explanation of training LSTM models, performing results with explanation and analysis of variance for results. Section 6 is sensitivity analysis. Section 7 focus on conclusion and discussion. 
+Since the beginning of 2020, an outbreak of a pandemic disease started in the world.On the one hand, all communities was working together to against COVID-19. On the other hand, with the invention of the COVID-19 vaccine and the implementation of various pandemic prevention measures such as facial coverings or closure of schools, people are beginning to look forward to the endpoint of the pandemic. Although the Omicron variant makes the endpoint unpredictable again, we still want to know when the world will get back normal. Fortunately, Recurrent Neural Network in machine learning provides a feasible approach for forecasting COVID-19 endpoint.Since data related to COVID-19 are time sequence such as new cases or new deaths, and we also consider that the more recent pandemic situation will have a greater impact on the future pandemic situation, the long short-term memory model can be considered appropriately.Moreover, compared with ARIMA model, the process of modeling the ANN model is easier and many model assumptions are not necessary. Generally, basic RNN structure and internal structure of LSTM are given by researchers including deciding the number of hidden layers and number of memory cells.We can use Keras package in Python to construct LSTM model conveniently. Furthermore, for the process of training the recurrent neural network, gradient descent algorithm and Backpropagation method are used. In addition, Programming trained the ANN model automatically and parameters were obtained automatically as well. Then, analysis of variance is a suitable method and is considered for comparison of endpoint among countries. Overall, this report aims to forecasting of COVID-19 endpoint in United States, Canada, Spain using LSTM networks and comparing predicted endpoint among these 3 countries whether they are significant different basis on the forecasting results.We want to predict the possible endpoint of COVID-19 pandemic in each country with the assumption that new variant will not appear in the future. It also help and as a reference for people to make decision such that government makes polices or university decides if take course in-person, etc. We will explore the WHO COVID-19 data from the WHO office website and vaccination data from website Ourworldindata in this project.The data of both websites are authentic and reliable data that has been officially confirmed.The report is organized as follows. Section 2 reviews the background of the COVID-19 pandemic.Section 3 explores the dataset and gives the process of features building. Section 4 introduces the background of RNN and LSTM models used, assumptions stated in this report. Section 5 contains model fitting including the explanation of training LSTM models, performing results with explanation and analysis of variance for results. Section 6 is sensitivity analysis. Section 7 focus on conclusion and discussion. 
 
 # Background {-}
 On March 11th 2020, World Health Organization declared the COVID-19 virus as global pandemic. COVID-19 was first found in Wuhan, Hubei province in China around December 2019 and spread out all over the world. Until 2 March 2022, 16:00 GMT-8, there is 438968263 confirmed cases and 5969439 confirmed deaths in the world. Around December 2020, first COVID-19 vaccine was produced massively and used. Until these days, 4327599641 persons are fully vaccinated and 4904935610 persons are vaccinated with at least one dose. Facial coverings, adaptation or closure of schools and businesses, limits and restrictions on public and private gatherings, restrictions on domestic movement, international travel restrictions, are main 6 measures to prevent COVID-19 in the world.The pandemic situation has been under control in many countries. World Health Organization collects data about this pandemic for research and prevent COVID-19 virus including Date_reported, Country_code, Country, WHO_region, New_cases, Cumulative_cases, New_deaths, Cumulative_deaths 8 variables more than 187180 records.Based on this dataset, we select data where country equal to Spain, Canada, United States of America with New_cases, Cumulative_cases, New_deaths	and Cumulative_deaths	4 variables for our forecasting task.Then, Ourworldindata also offers official COVID-19 data about vaccination.We select people_fully_vaccinated variable and where country equal to Spain, Canada, United States of America as our vaccination feature as well. 
@@ -65,7 +65,7 @@ ggplot(df_v, aes(x = df_v$date, y = df_v$people_fully_vaccinated)) +
 df$cfr <- df$Cumulative_deaths/df$Cumulative_cases
 df_aux <- df[-which(is.na(df$cfr)), ]
 ggplot(df_aux, aes(x = df_aux$Date_reported, y = df_aux$cfr)) + 
-  geom_line(aes(color = df_aux$Country), size = 1) + labs(title = "Plot4: case fatality rate (CFR) per day", x = "Date", y = "Case fatality rate ",colour = "Country") +
+  geom_line(aes(color = df_aux$Country), size = 1) + labs(title = "Plot4: Case fatality rate (CFR) per day", x = "Date", y = "Case fatality rate ",colour = "Country") +
   theme_minimal()
 ```
 
@@ -89,15 +89,15 @@ df.f <- read_csv("./result_table.csv")
 head(df.f[,c("week", "Country","transmission_rate","case_fatality_rate" ,"people_fully_vaccinated")], 10)
 
 ggplot(df.f, aes(x = df.f$week, y = df.f$transmission_rate)) + 
-  geom_line(aes(color = df.f$Country), size = 1) + labs(title = "Plot5: transmission rate per week", x = "Date", y = "Transmission rate",colour = "Country") +
+  geom_line(aes(color = df.f$Country), size = 1) + labs(title = "Plot5: Transmission rate per week", x = "Date", y = "Transmission rate",colour = "Country") +
   theme_minimal()
 
 ggplot(df.f, aes(x = df.f$week, y = df.f$case_fatality_rate)) + 
-  geom_line(aes(color = df.f$Country), size = 1) + labs(title = "Plot6: case fatality rate(CFR) per week", x = "Date", y = "Case fatality rate",colour = "Country") +
+  geom_line(aes(color = df.f$Country), size = 1) + labs(title = "Plot6: Case fatality rate(CFR) per week", x = "Date", y = "Case fatality rate",colour = "Country") +
   theme_minimal()
 
 ggplot(df.f, aes(x = df.f$week, y = df.f$people_fully_vaccinated)) + 
-  geom_line(aes(color = df.f$Country), size = 1) + labs(title = "Plot7: fully vaccinated rate per week", x = "Date", y = "Fully vaccinated rate",colour = "Country") +
+  geom_line(aes(color = df.f$Country), size = 1) + labs(title = "Plot7: Fully vaccinated rate per week", x = "Date", y = "Fully vaccinated rate",colour = "Country") +
   theme_minimal()
 ```
 
@@ -129,6 +129,8 @@ In the field of artificial neural network, the recurrent neural network is typic
 knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure2.png")
 ```
 
+Similarly, the recurrent neural network with multiple hidden can be present graphically (Huang, 2017):
+
 **Figure 3: Recurrent neural network with multiple hidden layers**
 
 ```{r echo=F, message=F, out.width = '60%'}
@@ -158,7 +160,7 @@ A new updated memory cell can be written: $c^{'}=g(z)f(z_i)+cf(z_f)$ and the out
 knitr::include_graphics("/Users/chenqian/Downloads/STA207/final/figure5.png")
 ```
 
-Before univariate time series can be modeled, it must be prepared. The LSTM model will learn a function that maps a sequence of past observations as input to an output observation. As such, the sequence of observations must be transformed into multiple examples from which the LSTM can learn (Brownlee, 2018). So, for a time series $x_1,x_2,...,x_T$, if the LSTM model uses 3 observations consecutive to predict next 2 observations consecutive, train data set will be prepared as:
+Before univariate time series can be modeled, it must be prepared. The LSTM model will learn a function that maps a sequence of past observations as input to an output observation. As such, the sequence of observations must be transformed into multiple examples from which the LSTM can learn (Brownlee, 2018). So, for instance, for a time series $x_1,x_2,...,x_T$, if the LSTM model uses 3 observations consecutive to predict next 2 observations consecutive, train data set will be prepared as:
 $$
 \{x_1,x_2,x_3\}\{x_4,x_5\} \\
 \{x_2,x_3,x_4\}\{x_5,x_6\} \\
@@ -338,7 +340,7 @@ plotmeans(RMSE~Country,xlab="Country",ylab="RMSE",
 
 ```
 
-**Comparison** 
+**Comparison endpoints** 
 
 For the comparison of endpoints, one-way ANOVA model with balance design is used. In this project, the model can be defined as follows:
 \
@@ -390,7 +392,7 @@ r=3;n=147;alpha=0.05;
 x.grid=seq(from=1e-5,to=6,length.out=1000);
 density.grid=df(x=x.grid, df1=r-1, df2=n-r)
 critical.value=qf(1-alpha,df1=r-1,df2=n-r);
-plot(density.grid~x.grid,type='l',xlab="Value of F-stat",ylab="Density",lwd=3,xlim=c(0,6),ylim=c(0,0.8))
+plot(density.grid~x.grid,type='l', main = "Plot 12: Visualization of critical value", xlab="Value of F-stat",ylab="Density",lwd=3,xlim=c(0,6),ylim=c(0,0.8))
 abline(v=critical.value,lwd=3,col='red')
 segments(x0=critical.value,x1=10,y0=0,y1=0,lwd=3,col="orange")
 points(x=critical.value,y=0,pch=16,col="orange",cex=2)
@@ -480,7 +482,7 @@ residuals.std = rstudent(anova.fit)
 hist(residuals.std)
 
 # Plot the Studentized residuals against fitted values
-plot(residuals.std~anova.fit$fitted.values,type='p',pch=16,cex=1.5,xlab="Fitted values",ylab="Residuals.std")
+plot(residuals.std~anova.fit$fitted.values,type='p',pch=16,cex=1.5,xlab="Fitted values",ylab="Residuals.std", main = "Plot 13: Studentized residuals against fitted values")
 abline(h=0)
 (vars = tapply(residuals.std, result$Country,mean))
 alpha=0.05;
@@ -511,13 +513,13 @@ residuals.std = rstudent(anova.fit)
 hist(residuals.std)
 
 # Plot the Studentized residuals against fitted values
-plot(residuals.std~anova.fit$fitted.values,type='p',pch=16,cex=1.5,xlab="Fitted values",ylab="Residuals.std")
+plot(residuals.std~anova.fit$fitted.values,type='p',pch=16,cex=1.5,xlab="Fitted values",ylab="Residuals.std", main = "Plot 14: Studentized residuals against fitted values")
 abline(h=0)
 (vars = tapply(residuals.std, result$Country,mean))
 alpha=0.05;
 
 # QQ-plot 
-qqnorm(residuals.std);qqline(residuals.std)
+qqnorm(residuals.std, main = "Plot 15: Normal Q-Q Plot");qqline(residuals.std)
 
 # Calculate the variances for each group
 (vars = tapply(result$`End Date`, result$Country,var))
@@ -527,24 +529,18 @@ alpha=0.05;
 result$res.abs=abs(anova.fit$residuals);
 summary(aov(res.abs~Country,data=result))
 
-boxcox(anova.fit) # chose log transformation. 
+boxcox(anova.fit, main = "Plot 16: Box-Cox transformation") # chose log transformation. 
 ```
 *** 
 \
 We found that the QQ-plot indicates heavy tail, normality does not be hold. The plot Studentized residuals against fitted values shows that the variance in each occupation may not be equal and the mean of Studentized residuals are 0. Result of Levene test leads us to reject the homoscedasticity of variance at significant level 0.05. All in all, our one way ANOVA model is lack normality and homoscedasticity of variance in each Country, we need to make data transformation, in this case, log transformation is applied by the result of Box-cox transformation method.In practice, without loss of generality, all endpoints add one to avoid math issue. 
 \
 
-# Discussion {-}
+# Discussion & Conclusion {-}
 
-Even though we can get the forecasting endpoints, there are a lot of assumptions may can not be satisfied. Especially, assumptions that all COVID-19 patients have no chance to infect others and fixed the CFR and number of fully vaccinated as the last record for each out sample prediction.The causality part could not be proved because the inverse prediction for the future can not be accomplished. It also should be noted that we assumed that there is no new variant in the future but the truth is COVID-19 virus has high probability to vary. In the future research, these problems will be crucial topic to discuss. The first task is quantify the chance of variation and the effect of measures. Moreover, in this project,only one layer LSTM is used and it may not enough to get better forecasting results. researcher could still research mre efficient neural networks and applied it into COVID-19 forecasting.In addition, weekly data in use caused the loss of information and mean as summary measures may be very sensitive to the outliers.Researcher can try the more robust summary measures like median and 3 days frequent data as well.
-The conclusion and discussion part is also discussed.Previously, the author concluded that US is still face the pandemic in the next 8 months, transmission rate will arrive 0 within 3 weeks in Canada and the transmission rate will arrive 0 within 3.06 weeks in Spain. The forecasting for US is explainable and realistic basis on the situation in US. However, that the forecasting results say that Spain and Canada will finished the pandemic in 3 weeks more or less is ridiculous and infeasible. My teammates indicate that one possible reason for this result is because the author used the crucial and very strong assumption that we can rational conclude that the end points of pandemic when transmission rate is of at most 0. In addition, the author also assume that the vaccinated rate and case fatality rate are no longer changed, it will lead to get more conservative results. At the suggestion of teammates, one more content is added in the assumption that the forecasting result of number of days only indicates the short or long time needed for ending the pandemic but not the exact days of endpoint.
-The part of Sensitivity analysis for RMSE is modified after discussion.First, author tried to use cross validation but finally teammate and author believe that this approach can not be used because the data is time series and consecutive.Second, teammate are confused about the definition of key performance indicator in used.Report mentioned that the RMSE is defined as the square root of the mean square error.In general, predict values for calculationg square error are obtained from one unique model.But in this report, each predict value comes from different model.So, this KPI assess the average predicting error for 3 countries rather than for different LSTM model.After explanation, teammate proposed that the statement and idea about RMSE must be pointed out in the report. So, it will be added in the report.
-The feature building part is discussed first, the statement that we multiple constant 10 for each variable in Canada and Spain due to the better model results without loss of generality may be inappropriate because the feature scale for 3 countries are not same, there are no convincing reasons that all features multiple 10 for Spain and Canada but not for US.The only explanation for this strategy is the predicting results are better when all features multiple 10 for Spain and Canada but it is not needed for US.However, teammates point out that the method can’t be modified just to get good results but lose meaning.After discussion, The features of US multiple 10 as well and the forecasting times is changed from 30 to 50 in order to get good results. It also related to the sensitivity analysis part, with the increasing in the sample size, sensitivity analysis by using ANOVA is more powerful than before, though training 50 times RNN models is time consuming.
+Even though we can get the forecasting endpoints, there are a lot of crucial and very strong assumptions may can not be satisfied. Especially, assumptions that all COVID-19 patients have no chance to infect others and fixed the CFR and number of fully vaccinated as the last record for each out sample prediction. It will lead to get more conservative results. Moreover, the assumption that we can rational conclude that the end points of pandemic when transmission rate is of at most 0 is hard to satisfy in the real world. So, the forecasting result of number of days only indicates the short or long time needed for ending the pandemic but not the exact date of endpoint. Second, in the feature building part, there are no convincing reasons that all features multiple 10 because the value of rate is larger than 1 in some case by multiple 10. The method can’t be modified just to get good results but lose meaning. In addition, the causality part could not be proved because the inverse prediction for the future can not be accomplished. It also should be noted that we assumed that there is no new variant in the future but the truth is COVID-19 virus has high probability to vary. In the future research, these problems will be crucial topic to discuss. The first task is quantify the chance of variation and the effect of measures. Futher, in this project,only one layer LSTM is used and it may not enough to get good forecasting results and it always to arrive the local optimal point basis on the large variance in RMSE. Researcher could still research more efficient neural networks and applied it into COVID-19 forecasting. In addition, weekly data in use caused the loss of information and mean as summary measures may be very sensitive to the outliers. Researcher can try the more robust summary measures like median and 3 days frequent data as well.Finally, only 50 times forecasting for each country. More times of forecasting are needed because it is obvious that sensitivity analysis by using ANOVA is more powerful with the increasing in the sample size, though training more than 50 times RNN models is time consuming.
 
-# Conclusion {-}
-In conclusion. First, US is still face the pandemic in the next 7 months which is a long period.But LSTM models predict that the COVID-19 pandemic will end in short period in Canada and Spain. In detail, we predict that the transmission rate will arrive 0 within 4.68 weeks in Canada.The transmission rate will arrive 0 within 4.48 weeks in Spain.However, it takes 28.76 weeks which is close to 7 months to arrive 0 in US. Second, the predicted endpoints are signifi.........
-
-
+In conclusion. First, US is still face the pandemic in the next 7 months which is a long period.But LSTM models predict that the COVID-19 pandemic will end in short period in Canada and Spain, if assumptions made in this report hold. In detail, we predict that the transmission rate will arrive 0 within 4.68 weeks in Canada on average.The transmission rate will arrive 0 within 4.48 weeks in Spain on average. However, it takes 28.76 weeks which is close to 7 months to arrive 0 in US. Second, the predicted endpoints are significant different among these 3 countries at significance level 0.05, specifically, US needs the largest time to end the pandemic and there is no significant different between Spain and Canada.Both of them have a short period endpoints. However, this result also indicates the more complicate situation of COVID-19 pandemic US and people should be careful to make their decision. US may still need to hold polices and focus on the vaccination tasks.  
 
 # References {-}
 
