@@ -1,0 +1,142 @@
+ST API reference 
+Here is Sensor Tower's API documentation. You can use these API endpoints to access information such as Google Play / App Store reviews, related keywords, category rankings, downloads/revenues, and other app data. Click on the APIs to get more information on each available endpoint.
+You can try each endpoint in this reference documentation to receive a sample request URL and response body. To try the endpoints, enter your auth token on the upper right, select the endpoint you want to try, adjust the parameters as necessary and click on "Try it out!" You can find your auth token on your user account profile.
+Your browser may not be able to load a large response on this page. Please try with a small date ranges and or apps / countries combination to see the sample responses. If you want to see a larger sample response, you can use your default API client of choice.
+
+Rate Limit: 6 requests per second
+
+Requests should be made to the following base URL, followed by the specific path to the API you want to use.
+
+
+Store Intelligence:
+
+Top Apps:
+https://api.sensortower-china.com:443/v1/ios/sales_report_estimates_comparison_attributes?comparison_attribute=absolute&time_range=week&measure=units&device_type=total&category=0&date=2016-01-04&end_date=2016-01-10&limit=25&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+TopPublishers: 
+https://api.sensortower-china.com:443/v1/ios/top_and_trending/publishers?comparison_attribute=absolute&time_range=week&measure=units&device_type=total&category=0&date=2016-01-04&end_date=2016-01-10&limit=25&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+Download / Revenue Estimates:
+https://api.sensortower-china.com:443/v1/ios/sales_report_estimates?app_ids=284882215&countries=WW&date_granularity=daily&start_date=2015-07-15&end_date=2015-07-20&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+{
+  "sales_report_estimates_key": {
+    "ios": {
+      "aid": "App ID",
+      "cc": "Country Code",
+      "d": "Date",
+      "iu": "iPhone Downloads",
+      "ir": "iPhone Revenue",
+      "au": "iPad Downloads",
+      "ar": "iPad Revenue"
+    },
+    "android": {
+      "aid": "App ID",
+      "c": "Country Code",
+      "d": "Date",
+      "u": "Android Downloads",
+      "r": "Android Revenue"
+    },
+    "unified": {
+      "app_id": "App ID",
+      "country": "Country Code",
+      "date": "Date",
+      "android_units": "Android Downloads",
+      "android_revenue": "Android Revenue",
+      "ipad_units": "iPad Downloads",
+      "ipad_revenue": "iPad Revenue",
+      "iphone_units": "iPhone Downloads",
+      "iphone_revenue": "iPhone Revenue"
+    }
+  }
+}
+
+Compact Download / Revenue Estimates:
+https://api.sensortower-china.com:443/v1/ios/compact_sales_report_estimates?start_date=2020-01-01&end_date=2020-01-02&app_ids=284882215&date_granularity=daily&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+{
+  "ios": [
+    "version(currently at 1)",
+    [
+      [
+        "app id (integer)",
+        [
+          [
+            "Date in unix time format (integer)",
+            "Country code (string)",
+            "Tablet revenue in cents (integer).",
+            "Tablet downloads (integer).",
+            "Phone revenue in cents (integer)",
+            "Phone downloads (integer)"
+          ]
+        ]
+      ]
+    ]
+  ],
+  "android": [
+    "version (currently at 1)",
+    [
+      [
+        "app id (string)",
+        [
+          [
+            "Date in unix time format (integer)",
+            "Country code (string)",
+            "Revenue in cents (integer)",
+            "Downloads (integer)"
+          ]
+        ]
+      ]
+    ]
+  ]
+}
+
+Games Breakdown:
+https://api.sensortower-china.com:443/v1/ios/games_breakdown?categories=7001&date_granularity=daily&start_date=2019-01-01&end_date=2019-01-07&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+{
+  "games_breakdown_key": {
+    "ios": {
+      "aid": "App ID",
+      "cc": "Country Code",
+      "d": "Date",
+      "iu": "iPhone Downloads",
+      "ir": "iPhone Revenue",
+      "au": "iPad Downloads",
+      "ar": "iPad Revenue"
+    },
+    "android": {
+      "aid": "App ID",
+      "cc": "Country Code",
+      "d": "Date",
+      "u": "Android Downloads",
+      "r": "Android Revenue"
+    }
+  }
+}
+
+Store Summary:
+https://api.sensortower-china.com:443/v1/ios/store_summary?categories=6012&date_granularity=daily&start_date=2015-07-15&end_date=2015-07-20&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+{
+  "sales_report_estimates_key": {
+    "ios": {
+      "aid": "App ID",
+      "cc": "Country Code",
+      "d": "Date",
+      "iu": "iPhone Downloads",
+      "ir": "iPhone Revenue",
+      "au": "iPad Downloads",
+      "ar": "iPad Revenue"
+    },
+    "android": {
+      "aid": "App ID",
+      "cc": "Country Code",
+      "d": "Date",
+      "u": "Android Downloads",
+      "r": "Android Revenue"
+    }
+  }
+}
+
+

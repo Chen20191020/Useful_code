@@ -1,0 +1,36 @@
+Search Apps & Publishers:
+https://api.sensortower-china.com:443/v1/ios/search_entities?entity_type=app&term=Lyft&limit=100&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+Publisher：
+https://api.sensortower-china.com:443/v1/ios/publisher/publisher_apps?publisher_id=368677371&limit=20&include_count=false&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+Reviews：
+Fetches Detailed Reviews Information
+https://api.sensortower-china.com:443/v1/ios/review/get_reviews?app_id=529479190&country=US&limit=10&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+Fetches Summary of Positive and Negative Review Counts By Day
+https://api.sensortower-china.com:443/v1/ios/review/app_history_summary?app_id=585661281&country=US&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+Ratings: 
+https://api.sensortower-china.com:443/v1/ios/review/get_ratings?app_id=284882215&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+(APP intelligence until  Ratings)
+
+
+apps:
+https://api.sensortower-china.com:443/v1/ios/apps?app_ids=284882215&country=US&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+app_ids:
+https://api.sensortower-china.com:443/v1/ios/apps/app_ids?category=6014&start_date=2020-02-08&updated_date=2020-02-14&limit=25&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+version_history:
+https://api.sensortower-china.com:443/v1/ios/apps/version_history?app_id=529479190&country=US&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+unified_apps:
+https://api.sensortower-china.com:443/v1/unified/apps?app_id_type=unified&app_ids=55c5025102ac64f9c0001f96&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+unified_Publisher: 
+https://api.sensortower-china.com:443/v1/unified/publishers?publisher_id_type=unified&publisher_ids=560487768ac350172200017c&auth_token=r7cTTJq5nBSqxMU_WmJo
+
+unified_publishers_apps:
+https://api.sensortower-china.com:443/v1/unified/publishers/apps?unified_id=560487768ac350172200017c&auth_token=r7cTTJq5nBSqxMU_WmJo

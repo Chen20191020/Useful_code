@@ -1,0 +1,962 @@
+
+% Default to the notebook output style
+
+    
+
+
+% Inherit from the specified cell style.
+
+
+
+
+    
+\documentclass[11pt]{article}
+
+    
+    
+    \usepackage[T1]{fontenc}
+    % Nicer default font (+ math font) than Computer Modern for most use cases
+    \usepackage{mathpazo}
+
+    % Basic figure setup, for now with no caption control since it's done
+    % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
+    \usepackage{graphicx}
+    % We will generate all images so they have a width \maxwidth. This means
+    % that they will get their normal width if they fit onto the page, but
+    % are scaled down if they would overflow the margins.
+    \makeatletter
+    \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth
+    \else\Gin@nat@width\fi}
+    \makeatother
+    \let\Oldincludegraphics\includegraphics
+    % Set max figure width to be 80% of text width, for now hardcoded.
+    \renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=.8\maxwidth]{#1}}
+    % Ensure that by default, figures have no caption (until we provide a
+    % proper Figure object with a Caption API and a way to capture that
+    % in the conversion process - todo).
+    \usepackage{caption}
+    \DeclareCaptionLabelFormat{nolabel}{}
+    \captionsetup{labelformat=nolabel}
+
+    \usepackage{adjustbox} % Used to constrain images to a maximum size 
+    \usepackage{xcolor} % Allow colors to be defined
+    \usepackage{enumerate} % Needed for markdown enumerations to work
+    \usepackage{geometry} % Used to adjust the document margins
+    \usepackage{amsmath} % Equations
+    \usepackage{amssymb} % Equations
+    \usepackage{textcomp} % defines textquotesingle
+    % Hack from http://tex.stackexchange.com/a/47451/13684:
+    \AtBeginDocument{%
+        \def\PYZsq{\textquotesingle}% Upright quotes in Pygmentized code
+    }
+    \usepackage{upquote} % Upright quotes for verbatim code
+    \usepackage{eurosym} % defines \euro
+    \usepackage[mathletters]{ucs} % Extended unicode (utf-8) support
+    \usepackage[utf8x]{inputenc} % Allow utf-8 characters in the tex document
+    \usepackage{fancyvrb} % verbatim replacement that allows latex
+    \usepackage{grffile} % extends the file name processing of package graphics 
+                         % to support a larger range 
+    % The hyperref package gives us a pdf with properly built
+    % internal navigation ('pdf bookmarks' for the table of contents,
+    % internal cross-reference links, web links for URLs, etc.)
+    \usepackage{hyperref}
+    \usepackage{longtable} % longtable support required by pandoc >1.10
+    \usepackage{booktabs}  % table support for pandoc > 1.12.2
+    \usepackage[inline]{enumitem} % IRkernel/repr support (it uses the enumerate* environment)
+    \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
+                                % normalem makes italics be italics, not underlines
+    
+
+    
+    
+    % Colors for the hyperref package
+    \definecolor{urlcolor}{rgb}{0,.145,.698}
+    \definecolor{linkcolor}{rgb}{.71,0.21,0.01}
+    \definecolor{citecolor}{rgb}{.12,.54,.11}
+
+    % ANSI colors
+    \definecolor{ansi-black}{HTML}{3E424D}
+    \definecolor{ansi-black-intense}{HTML}{282C36}
+    \definecolor{ansi-red}{HTML}{E75C58}
+    \definecolor{ansi-red-intense}{HTML}{B22B31}
+    \definecolor{ansi-green}{HTML}{00A250}
+    \definecolor{ansi-green-intense}{HTML}{007427}
+    \definecolor{ansi-yellow}{HTML}{DDB62B}
+    \definecolor{ansi-yellow-intense}{HTML}{B27D12}
+    \definecolor{ansi-blue}{HTML}{208FFB}
+    \definecolor{ansi-blue-intense}{HTML}{0065CA}
+    \definecolor{ansi-magenta}{HTML}{D160C4}
+    \definecolor{ansi-magenta-intense}{HTML}{A03196}
+    \definecolor{ansi-cyan}{HTML}{60C6C8}
+    \definecolor{ansi-cyan-intense}{HTML}{258F8F}
+    \definecolor{ansi-white}{HTML}{C5C1B4}
+    \definecolor{ansi-white-intense}{HTML}{A1A6B2}
+
+    % commands and environments needed by pandoc snippets
+    % extracted from the output of `pandoc -s`
+    \providecommand{\tightlist}{%
+      \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+    % Add ',fontsize=\small' for more characters per line
+    \newenvironment{Shaded}{}{}
+    \newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+    \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+    \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+    \newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+    \newcommand{\RegionMarkerTok}[1]{{#1}}
+    \newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\NormalTok}[1]{{#1}}
+    
+    % Additional commands for more recent versions of Pandoc
+    \newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+    \newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+    \newcommand{\ImportTok}[1]{{#1}}
+    \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+    \newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+    \newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+    \newcommand{\BuiltInTok}[1]{{#1}}
+    \newcommand{\ExtensionTok}[1]{{#1}}
+    \newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+    \newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+    \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    
+    
+    % Define a nice break command that doesn't care if a line doesn't already
+    % exist.
+    \def\br{\hspace*{\fill} \\* }
+    % Math Jax compatability definitions
+    \def\gt{>}
+    \def\lt{<}
+    % Document parameters
+    \title{TA\_ST\_AA}
+    
+    
+    
+
+    % Pygments definitions
+    
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@fm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sa\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@dl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+
+    % Exact colors from NB
+    \definecolor{incolor}{rgb}{0.0, 0.0, 0.5}
+    \definecolor{outcolor}{rgb}{0.545, 0.0, 0.0}
+
+
+
+    
+    % Prevent overflowing lines due to hard-to-break entities
+    \sloppy 
+    % Setup hyperref package
+    \hypersetup{
+      breaklinks=true,  % so long urls are correctly broken across lines
+      colorlinks=true,
+      urlcolor=urlcolor,
+      linkcolor=linkcolor,
+      citecolor=citecolor,
+      }
+    % Slightly bigger margins than the latex defaults
+    
+    \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+    
+    
+
+    \begin{document}
+    
+    
+    \maketitle
+    
+    
+
+    
+    \section{SensorTower与AppAnnie游戏下载量准确性对比（基于车类游戏数据）}\label{sensortowerux4e0eappannieux6e38ux620fux4e0bux8f7dux91cfux51c6ux786eux6027ux5bf9ux6bd4ux57faux4e8eux8f66ux7c7bux6e38ux620fux6570ux636e}
+
+\section{1）API使用函数与指标比较函数}\label{apiux4f7fux7528ux51fdux6570ux4e0eux6307ux6807ux6bd4ux8f83ux51fdux6570}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{c+c1}{\PYZsh{} 说明：该部分是API使用函数与比较函数部分，前期准备工作。 }
+        \PY{c+c1}{\PYZsh{} Author： Chen}
+        \PY{c+c1}{\PYZsh{} Date：2021/03/04}
+        
+        \PY{k+kn}{import} \PY{n+nn}{requests}\PY{o}{,}\PY{n+nn}{json}
+        \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+        \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+        \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+        \PY{k+kn}{import} \PY{n+nn}{requests}\PY{o}{,}\PY{n+nn}{json}
+        \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+        \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+        \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+        
+        
+        
+        \PY{c+c1}{\PYZsh{} Functions for getting SensorTower data. }
+        \PY{c+c1}{\PYZsh{} Store\PYZus{}Intelligence}
+        \PY{c+c1}{\PYZsh{} Rate Limit: 6 requests per second. }
+        \PY{c+c1}{\PYZsh{} Requests should be made to the following base URL, followed by the specific path to the API you want to use.}
+        \PY{c+c1}{\PYZsh{} Latest Updated Date: 2021.03.02}
+        \PY{c+c1}{\PYZsh{} Author: Chen}
+        
+        \PY{c+c1}{\PYZsh{} Compact Download / Revenue Estimates ???}
+        
+        
+        \PY{c+c1}{\PYZsh{} Download / Revenue Estimates for applications (If run error please try https://api.sensortower\PYZhy{}china.com:443)}
+        
+        \PY{c+c1}{\PYZsh{} Input: }
+        \PY{c+c1}{\PYZsh{} os: Operating System (use \PYZdq{}ios\PYZdq{}, \PYZdq{}android\PYZdq{},or \PYZdq{}unified\PYZdq{})}
+        \PY{c+c1}{\PYZsh{} country: Checking CountryCodes\PYZus{}CategoryIDs to select country (use\PYZdq{}WW\PYZdq{} for worldwide, \PYZdq{}US\PYZdq{}  for United States)  }
+        \PY{c+c1}{\PYZsh{} date\PYZus{}granularity: use \PYZdq{}daily\PYZdq{}, \PYZdq{}weekly\PYZdq{},\PYZdq{}monthly\PYZdq{}, or\PYZdq{}quarterly\PYZdq{},defaults to \PYZdq{}daily\PYZdq{}}
+        \PY{c+c1}{\PYZsh{} start\PYZus{}date:(yyyy\PYZhy{}mm\PYZhy{}dd) }
+        \PY{c+c1}{\PYZsh{} end\PYZus{}date: (yyyy\PYZhy{}mm\PYZhy{}dd)  }
+        \PY{c+c1}{\PYZsh{} app\PYZus{}ids: (defaults to None) }
+        \PY{c+c1}{\PYZsh{} publisher\PYZus{}ids: (defaults to None) }
+        \PY{c+c1}{\PYZsh{} Do not give both app\PYZus{}ids and publisher\PYZus{}ids at same time. }
+        
+        \PY{c+c1}{\PYZsh{} Output: A dataframe which containz: }
+         
+        \PY{c+c1}{\PYZsh{} \PYZob{}}
+        \PY{c+c1}{\PYZsh{}   \PYZdq{}sales\PYZus{}report\PYZus{}estimates\PYZus{}key\PYZdq{}: \PYZob{}}
+        \PY{c+c1}{\PYZsh{}     \PYZdq{}ios\PYZdq{}: \PYZob{}}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}aid\PYZdq{}: \PYZdq{}App ID\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}cc\PYZdq{}: \PYZdq{}Country Code\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}d\PYZdq{}: \PYZdq{}Date\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}iu\PYZdq{}: \PYZdq{}iPhone Downloads\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}ir\PYZdq{}: \PYZdq{}iPhone Revenue\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}au\PYZdq{}: \PYZdq{}iPad Downloads\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}ar\PYZdq{}: \PYZdq{}iPad Revenue\PYZdq{}}
+        \PY{c+c1}{\PYZsh{}     \PYZcb{},}
+        \PY{c+c1}{\PYZsh{}     \PYZdq{}android\PYZdq{}: \PYZob{}}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}aid\PYZdq{}: \PYZdq{}App ID\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}c\PYZdq{}: \PYZdq{}Country Code\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}d\PYZdq{}: \PYZdq{}Date\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}u\PYZdq{}: \PYZdq{}Android Downloads\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}r\PYZdq{}: \PYZdq{}Android Revenue\PYZdq{}}
+        \PY{c+c1}{\PYZsh{}     \PYZcb{},}
+        \PY{c+c1}{\PYZsh{}     \PYZdq{}unified\PYZdq{}: \PYZob{}}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}app\PYZus{}id\PYZdq{}: \PYZdq{}App ID\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}country\PYZdq{}: \PYZdq{}Country Code\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}date\PYZdq{}: \PYZdq{}Date\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}android\PYZus{}units\PYZdq{}: \PYZdq{}Android Downloads\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}android\PYZus{}revenue\PYZdq{}: \PYZdq{}Android Revenue\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}ipad\PYZus{}units\PYZdq{}: \PYZdq{}iPad Downloads\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}ipad\PYZus{}revenue\PYZdq{}: \PYZdq{}iPad Revenue\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}iphone\PYZus{}units\PYZdq{}: \PYZdq{}iPhone Downloads\PYZdq{},}
+        \PY{c+c1}{\PYZsh{}       \PYZdq{}iphone\PYZus{}revenue\PYZdq{}: \PYZdq{}iPhone Revenue\PYZdq{}}
+        \PY{c+c1}{\PYZsh{}     \PYZcb{}}
+        \PY{c+c1}{\PYZsh{}   \PYZcb{}}
+        \PY{c+c1}{\PYZsh{} \PYZcb{}}
+        \PY{c+c1}{\PYZsh{} If used publisher\PYZus{}ids, all applications made by this publisher will return. }
+        
+        \PY{c+c1}{\PYZsh{} Example: }
+        \PY{c+c1}{\PYZsh{} get\PYZus{}data\PYZus{}apps = requests\PYZus{}Download\PYZus{}RevenueEstimates(\PYZsq{}ios\PYZsq{}, \PYZsq{}US\PYZsq{}, \PYZsq{}daily\PYZsq{}, \PYZsq{}2020\PYZhy{}11\PYZhy{}01\PYZsq{}, \PYZsq{}2020\PYZhy{}11\PYZhy{}04\PYZsq{}, \PYZsq{}1531465966\PYZsq{})}
+        \PY{c+c1}{\PYZsh{} get\PYZus{}data\PYZus{}publishers = requests\PYZus{}Download\PYZus{}RevenueEstimates(\PYZsq{}ios\PYZsq{}, \PYZsq{}US\PYZsq{}, \PYZsq{}daily\PYZsq{}, \PYZsq{}2020\PYZhy{}11\PYZhy{}01\PYZsq{}, \PYZsq{}2020\PYZhy{}11\PYZhy{}04\PYZsq{}, publisher\PYZus{}ids = \PYZsq{}1191495496\PYZsq{}) }
+        
+        \PY{k}{def} \PY{n+nf}{requests\PYZus{}Download\PYZus{}RevenueEstimates}\PY{p}{(}\PY{n}{os}\PY{p}{,} \PY{n}{country}\PY{p}{,} \PY{n}{date\PYZus{}granularity}\PY{p}{,} \PY{n}{start\PYZus{}date}\PY{p}{,} \PY{n}{end\PYZus{}date}\PY{p}{,} \PY{n}{app\PYZus{}ids} \PY{o}{=} \PY{k+kc}{None}\PY{p}{,} \PY{n}{publisher\PYZus{}ids} \PY{o}{=} \PY{k+kc}{None}\PY{p}{)}\PY{p}{:}
+            \PY{k}{if} \PY{n}{app\PYZus{}ids} \PY{o}{==} \PY{k+kc}{None} \PY{o+ow}{and} \PY{n}{publisher\PYZus{}ids} \PY{o}{==} \PY{k+kc}{None}\PY{p}{:}
+                \PY{k}{return}\PY{p}{(}\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Error, at least one app ID, or one publisher ID is required.}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+                
+            \PY{k}{elif} \PY{n}{publisher\PYZus{}ids} \PY{o}{==} \PY{k+kc}{None}\PY{p}{:}
+                \PY{n}{aux\PYZus{}DRE} \PY{o}{=} \PY{n}{requests}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{https://api.sensortower\PYZhy{}china.com/v1/}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{o}{+}\PY{n}{os}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/sales\PYZus{}report\PYZus{}estimates?app\PYZus{}ids=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{app\PYZus{}ids}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}countries=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{country}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}date\PYZus{}granularity=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{date\PYZus{}granularity}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}start\PYZus{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}
+                                       \PY{n}{start\PYZus{}date}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}end\PYZus{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}
+                                       \PY{n}{end\PYZus{}date}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{p}{)}
+            \PY{k}{else}\PY{p}{:}
+                \PY{n}{aux\PYZus{}DRE} \PY{o}{=} \PY{n}{requests}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{https://api.sensortower\PYZhy{}china.com/v1/}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{o}{+}\PY{n}{os}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/sales\PYZus{}report\PYZus{}estimates?publisher\PYZus{}ids=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{publisher\PYZus{}ids}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}countries=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{country}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}date\PYZus{}granularity=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{date\PYZus{}granularity}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}start\PYZus{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}
+                                       \PY{n}{start\PYZus{}date}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}end\PYZus{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}
+                                       \PY{n}{end\PYZus{}date}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{p}{)}
+            \PY{n}{df\PYZus{}DRE} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{aux\PYZus{}DRE}\PY{o}{.}\PY{n}{json}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+            \PY{n+nb}{print}\PY{p}{(}\PY{n}{aux\PYZus{}DRE}\PY{o}{.}\PY{n}{status\PYZus{}code}\PY{p}{)}
+            \PY{k}{return}\PY{p}{(}\PY{n}{df\PYZus{}DRE}\PY{p}{)}
+        
+        
+        \PY{c+c1}{\PYZsh{} Top Apps(If run error please try https://api.sensortower\PYZhy{}china.com:443) for one day, week, month, quarter. 给出指定日期后，会寻找该日期所在的日，周，月，季度，}
+        \PY{c+c1}{\PYZsh{} Input:}
+        \PY{c+c1}{\PYZsh{} os: Operating System (use \PYZdq{}ios\PYZdq{}, \PYZdq{}android\PYZdq{},or \PYZdq{}unified\PYZdq{})}
+        \PY{c+c1}{\PYZsh{} comparision\PYZus{}attribute: use \PYZdq{}absolute\PYZdq{}, \PYZdq{}delta\PYZdq{}, or \PYZdq{}transformed\PYZus{}delta\PYZdq{}}
+        \PY{c+c1}{\PYZsh{} time\PYZus{}range: use \PYZdq{}day\PYZdq{},\PYZdq{}week\PYZdq{}, \PYZdq{}month\PYZdq{}, or \PYZdq{}quarter\PYZdq{}}
+        \PY{c+c1}{\PYZsh{} measure: use \PYZdq{}units\PYZdq{} or \PYZdq{}revenue\PYZdq{}}
+        \PY{c+c1}{\PYZsh{} device\PYZus{}type: use \PYZdq{}iphone\PYZdq{}, \PYZdq{}ipad\PYZdq{}, or \PYZdq{}total\PYZdq{} for `ios`, leave blank for `android`, use \PYZdq{}total\PYZdq{} for `unified`}
+        \PY{c+c1}{\PYZsh{} category: Checking CountryCodes\PYZus{}CategoryIDs to select category.(use 6014 for game applications)}
+        \PY{c+c1}{\PYZsh{} date: Date.YYYY\PYZhy{}MM\PYZhy{}DD format.Auto\PYZhy{}changes to the beginning of time\PYZus{}range.Ex: Mondays for weeks, 1st of the month, 1st day of the quarter, 1st day of the year.}
+        \PY{c+c1}{\PYZsh{} country: Checking CountryCodes\PYZus{}CategoryIDs to select country (use\PYZdq{}WW\PYZdq{} for worldwide, \PYZdq{}US\PYZdq{}  for United States)}
+        \PY{c+c1}{\PYZsh{} limit: Limit how many apps per call. (Default: 25, Max: 2000)}
+        
+        \PY{c+c1}{\PYZsh{} Output: A dataframe which contains informations of top Apps. }
+        \PY{c+c1}{\PYZsh{} The variable custom\PYZus{}tags contains informations about each application. }
+        
+        \PY{c+c1}{\PYZsh{} Example\PYZus{}ios\PYZus{}uni: }
+        \PY{c+c1}{\PYZsh{} https://api.sensortower\PYZhy{}china.com/v1/ios/sales\PYZus{}report\PYZus{}estimates\PYZus{}comparison\PYZus{}attributes?comparison\PYZus{}attribute=absolute\PYZam{}time\PYZus{}range=week\PYZam{}measure=units\PYZam{}device\PYZus{}type=total\PYZam{}category=6014\PYZam{}date=2021\PYZhy{}02\PYZhy{}08\PYZam{}country=US\PYZam{}limit=25\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}
+        \PY{c+c1}{\PYZsh{} get\PYZus{}week\PYZus{}AppRanking1 = requests\PYZus{}ios\PYZus{}uni\PYZus{}TopApps\PYZus{}periodic(\PYZsq{}ios\PYZsq{}, \PYZsq{}absolute\PYZsq{}, \PYZsq{}week\PYZsq{},\PYZsq{}units\PYZsq{}, \PYZsq{}total\PYZsq{}, \PYZsq{}6014\PYZsq{}, \PYZsq{}2021\PYZhy{}02\PYZhy{}08\PYZsq{},\PYZsq{}US\PYZsq{},\PYZsq{}25\PYZsq{}) \PYZsh{} 2021\PYZhy{}02\PYZhy{}08\PYZhy{}\PYZhy{}\PYZhy{}2021\PYZhy{}02\PYZhy{}14}
+        \PY{c+c1}{\PYZsh{} get\PYZus{}week\PYZus{}AppRanking2 = requests\PYZus{}ios\PYZus{}uni\PYZus{}TopApps\PYZus{}periodic(\PYZsq{}ios\PYZsq{}, \PYZsq{}absolute\PYZsq{}, \PYZsq{}week\PYZsq{},\PYZsq{}units\PYZsq{}, \PYZsq{}total\PYZsq{}, \PYZsq{}6014\PYZsq{}, \PYZsq{}2021\PYZhy{}02\PYZhy{}07\PYZsq{},\PYZsq{}US\PYZsq{},\PYZsq{}25\PYZsq{}) \PYZsh{} 2021\PYZhy{}02\PYZhy{}01\PYZhy{}\PYZhy{}\PYZhy{}2021\PYZhy{}02\PYZhy{}7}
+        \PY{c+c1}{\PYZsh{} get\PYZus{}week\PYZus{}AppRanking3 = requests\PYZus{}ios\PYZus{}uni\PYZus{}TopApps\PYZus{}periodic(\PYZsq{}ios\PYZsq{}, \PYZsq{}absolute\PYZsq{}, \PYZsq{}week\PYZsq{},\PYZsq{}units\PYZsq{}, \PYZsq{}total\PYZsq{}, \PYZsq{}6014\PYZsq{}, \PYZsq{}2021\PYZhy{}02\PYZhy{}03\PYZsq{},\PYZsq{}US\PYZsq{},\PYZsq{}25\PYZsq{}) \PYZsh{} 2021\PYZhy{}02\PYZhy{}01\PYZhy{}\PYZhy{}\PYZhy{}2021\PYZhy{}02\PYZhy{}7}
+        
+        
+        \PY{c+c1}{\PYZsh{} Example\PYZus{}Android: }
+        \PY{c+c1}{\PYZsh{} https://api.sensortower\PYZhy{}china.com/v1/android/sales\PYZus{}report\PYZus{}estimates\PYZus{}comparison\PYZus{}attributes?comparison\PYZus{}attribute=absolute\PYZam{}time\PYZus{}range=week\PYZam{}measure=units\PYZam{}category=game\PYZam{}date=2021\PYZhy{}02\PYZhy{}08\PYZam{}country=US\PYZam{}limit=25\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}
+        \PY{c+c1}{\PYZsh{} get\PYZus{}week\PYZus{}ranking4 = requests\PYZus{}Android\PYZus{}TopApps\PYZus{}periodic(\PYZsq{}android\PYZsq{}, \PYZsq{}absolute\PYZsq{}, \PYZsq{}week\PYZsq{},\PYZsq{}units\PYZsq{}, \PYZsq{}game\PYZsq{}, \PYZsq{}2021\PYZhy{}02\PYZhy{}08\PYZsq{},\PYZsq{}US\PYZsq{},\PYZsq{}25\PYZsq{})}
+        
+        \PY{k}{def} \PY{n+nf}{requests\PYZus{}ios\PYZus{}uni\PYZus{}TopApps\PYZus{}periodic}\PY{p}{(}\PY{n}{os}\PY{p}{,}\PY{n}{comparision\PYZus{}attribute}\PY{p}{,} \PY{n}{time\PYZus{}range}\PY{p}{,} \PY{n}{measure}\PY{p}{,} \PY{n}{device\PYZus{}type}\PY{p}{,} \PY{n}{category}\PY{p}{,} \PY{n}{date}\PY{p}{,} \PY{n}{country}\PY{p}{,} \PY{n}{limit}\PY{p}{)}\PY{p}{:}  
+            \PY{n}{aux\PYZus{}TopApps} \PY{o}{=} \PY{n}{requests}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{https://api.sensortower\PYZhy{}china.com:443/v1/}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{o}{+}\PY{n}{os}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/sales\PYZus{}report\PYZus{}estimates\PYZus{}comparison\PYZus{}attributes?comparison\PYZus{}attribute=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{comparision\PYZus{}attribute}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}time\PYZus{}range=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{time\PYZus{}range}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}measure=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{measure}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}device\PYZus{}type=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{device\PYZus{}type}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}category=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{category}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{date}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}country=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{country}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}limit=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{limit}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{p}{)}
+            \PY{n}{df\PYZus{}TopApps} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{aux\PYZus{}TopApps}\PY{o}{.}\PY{n}{json}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+            \PY{n+nb}{print}\PY{p}{(}\PY{n}{aux\PYZus{}TopApps}\PY{o}{.}\PY{n}{status\PYZus{}code}\PY{p}{)} \PY{c+c1}{\PYZsh{} Get response messages}
+            \PY{k}{return}\PY{p}{(}\PY{n}{df\PYZus{}TopApps}\PY{p}{)}
+        
+        
+        \PY{c+c1}{\PYZsh{} def requests\PYZus{}TopApps\PYZus{}customized(os,comparision\PYZus{}attribute, measure, device\PYZus{}type, category, date, end\PYZus{}date, country, limit):  }
+        \PY{c+c1}{\PYZsh{}     aux\PYZus{}TopApps = requests.get(\PYZsq{}https://api.sensortower\PYZhy{}china.com:443/v1/\PYZsq{}}
+        \PY{c+c1}{\PYZsh{}                                +os+\PYZsq{}/sales\PYZus{}report\PYZus{}estimates\PYZus{}comparison\PYZus{}attributes?comparison\PYZus{}attribute=\PYZsq{}+comparision\PYZus{}attribute+}
+        \PY{c+c1}{\PYZsh{}                                \PYZsq{}\PYZam{}measure=\PYZsq{}+measure+}
+        \PY{c+c1}{\PYZsh{}                                \PYZsq{}\PYZam{}device\PYZus{}type=\PYZsq{}+device\PYZus{}type+}
+        \PY{c+c1}{\PYZsh{}                                \PYZsq{}\PYZam{}category=\PYZsq{}+category+}
+        \PY{c+c1}{\PYZsh{}                                \PYZsq{}\PYZam{}date=\PYZsq{}+date+}
+        \PY{c+c1}{\PYZsh{}                                \PYZsq{}\PYZam{}end\PYZus{}date=\PYZsq{}+end\PYZus{}date+}
+        \PY{c+c1}{\PYZsh{}                                \PYZsq{}\PYZam{}country=\PYZsq{}+country+}
+        \PY{c+c1}{\PYZsh{}                                \PYZsq{}\PYZam{}limit=\PYZsq{}+limit+}
+        \PY{c+c1}{\PYZsh{}                                \PYZsq{}\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo\PYZsq{}}
+        \PY{c+c1}{\PYZsh{}                                )}
+        \PY{c+c1}{\PYZsh{}     df\PYZus{}TopApps = pd.DataFrame(aux\PYZus{}TopApps.json())}
+        \PY{c+c1}{\PYZsh{}     print(aux\PYZus{}TopApps.status\PYZus{}code) \PYZsh{} Get response messages}
+        \PY{c+c1}{\PYZsh{}     return(df\PYZus{}TopApps)    }
+        
+        
+        \PY{k}{def} \PY{n+nf}{requests\PYZus{}Android\PYZus{}TopApps\PYZus{}periodic}\PY{p}{(}\PY{n}{os}\PY{p}{,}\PY{n}{comparision\PYZus{}attribute}\PY{p}{,} \PY{n}{time\PYZus{}range}\PY{p}{,} \PY{n}{measure}\PY{p}{,} \PY{n}{category}\PY{p}{,} \PY{n}{date}\PY{p}{,} \PY{n}{country}\PY{p}{,} \PY{n}{limit}\PY{p}{)}\PY{p}{:}  
+            \PY{n}{aux\PYZus{}TopApps} \PY{o}{=} \PY{n}{requests}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{https://api.sensortower\PYZhy{}china.com/v1/}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{o}{+}\PY{n}{os}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/sales\PYZus{}report\PYZus{}estimates\PYZus{}comparison\PYZus{}attributes?comparison\PYZus{}attribute=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{comparision\PYZus{}attribute}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}time\PYZus{}range=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{time\PYZus{}range}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}measure=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{measure}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}category=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{category}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{date}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}country=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{country}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}limit=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{limit}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{p}{)}
+            \PY{n}{df\PYZus{}TopApps} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{aux\PYZus{}TopApps}\PY{o}{.}\PY{n}{json}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+            \PY{n+nb}{print}\PY{p}{(}\PY{n}{aux\PYZus{}TopApps}\PY{o}{.}\PY{n}{status\PYZus{}code}\PY{p}{)} \PY{c+c1}{\PYZsh{} Get response messages}
+            \PY{k}{return}\PY{p}{(}\PY{n}{df\PYZus{}TopApps}\PY{p}{)}
+        
+        
+        \PY{c+c1}{\PYZsh{} Top Publishers(If run error please try https://api.sensortower\PYZhy{}china.com:443) for one day, week, month, quarter. 给出指定日期后，会寻找该日期所在的日，周，月，季度，}
+        \PY{c+c1}{\PYZsh{} Input:}
+        \PY{c+c1}{\PYZsh{} os: Operating System (use \PYZdq{}ios\PYZdq{}, \PYZdq{}android\PYZdq{},or \PYZdq{}unified\PYZdq{})}
+        \PY{c+c1}{\PYZsh{} comparision\PYZus{}attribute: use \PYZdq{}absolute\PYZdq{}, \PYZdq{}delta\PYZdq{}, or \PYZdq{}transformed\PYZus{}delta\PYZdq{}}
+        \PY{c+c1}{\PYZsh{} time\PYZus{}range: use \PYZdq{}day\PYZdq{},\PYZdq{}week\PYZdq{}, \PYZdq{}month\PYZdq{}, or \PYZdq{}quarter\PYZdq{}}
+        \PY{c+c1}{\PYZsh{} measure: use \PYZdq{}units\PYZdq{} or \PYZdq{}revenue\PYZdq{}}
+        \PY{c+c1}{\PYZsh{} device\PYZus{}type: use \PYZdq{}iphone\PYZdq{}, \PYZdq{}ipad\PYZdq{}, or \PYZdq{}total\PYZdq{} for `ios`, leave blank for `android` and `unified`}
+        \PY{c+c1}{\PYZsh{} category: Checking CountryCodes\PYZus{}CategoryIDs to select category.(use 6014 for game applications)}
+        \PY{c+c1}{\PYZsh{} date: Date.YYYY\PYZhy{}MM\PYZhy{}DD format.Auto\PYZhy{}changes to the beginning of time\PYZus{}range.Ex: Mondays for weeks, 1st of the month, 1st day of the quarter, 1st day of the year.}
+        \PY{c+c1}{\PYZsh{} country: Checking CountryCodes\PYZus{}CategoryIDs to select country (use\PYZdq{}WW\PYZdq{} for worldwide, \PYZdq{}US\PYZdq{}  for United States)}
+        \PY{c+c1}{\PYZsh{} limit: Limit how many apps per call. (Default: 25, Max: 2000)}
+        
+        \PY{c+c1}{\PYZsh{} Output: A dataframe which contains informations of top Publishers. }
+        \PY{c+c1}{\PYZsh{} The variable apps contains all informations of applications made by each publisher. }
+        
+        \PY{c+c1}{\PYZsh{} Example\PYZus{}ios: }
+        \PY{c+c1}{\PYZsh{} https://api.sensortower\PYZhy{}china.com/v1/ios/top\PYZus{}and\PYZus{}trending/publishers?comparison\PYZus{}attribute=absolute\PYZam{}time\PYZus{}range=week\PYZam{}measure=units\PYZam{}device\PYZus{}type=total\PYZam{}category=6014\PYZam{}date=2021\PYZhy{}02\PYZhy{}08\PYZam{}country=US\PYZam{}limit=25\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}
+        \PY{c+c1}{\PYZsh{} get\PYZus{}week\PYZus{}PubRanking1\PYZus{}ios = requests\PYZus{}ios\PYZus{}TopPublishers\PYZus{}periodic(\PYZsq{}ios\PYZsq{}, \PYZsq{}absolute\PYZsq{}, \PYZsq{}week\PYZsq{},\PYZsq{}units\PYZsq{}, \PYZsq{}total\PYZsq{}, \PYZsq{}6014\PYZsq{}, \PYZsq{}2021\PYZhy{}02\PYZhy{}08\PYZsq{},\PYZsq{}US\PYZsq{},\PYZsq{}25\PYZsq{})}
+        
+        \PY{c+c1}{\PYZsh{} Example\PYZus{}Android\PYZus{}uni: }
+        \PY{c+c1}{\PYZsh{} https://api.sensortower\PYZhy{}china.com/v1/android/top\PYZus{}and\PYZus{}trending/publishers?comparison\PYZus{}attribute=absolute\PYZam{}time\PYZus{}range=week\PYZam{}measure=units\PYZam{}category=6014\PYZam{}date=2021\PYZhy{}02\PYZhy{}08\PYZam{}country=US\PYZam{}limit=25\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}
+        \PY{c+c1}{\PYZsh{} get\PYZus{}week\PYZus{}PubRanking1\PYZus{}android = requests\PYZus{}Android\PYZus{}uni\PYZus{}TopPublishers\PYZus{}periodic(\PYZsq{}android\PYZsq{}, \PYZsq{}absolute\PYZsq{}, \PYZsq{}week\PYZsq{},\PYZsq{}units\PYZsq{}, \PYZsq{}game\PYZsq{}, \PYZsq{}2021\PYZhy{}02\PYZhy{}08\PYZsq{},\PYZsq{}US\PYZsq{},\PYZsq{}25\PYZsq{})}
+        
+        \PY{k}{def} \PY{n+nf}{requests\PYZus{}ios\PYZus{}TopPublishers\PYZus{}periodic}\PY{p}{(}\PY{n}{os}\PY{p}{,}\PY{n}{comparision\PYZus{}attribute}\PY{p}{,} \PY{n}{time\PYZus{}range}\PY{p}{,} \PY{n}{measure}\PY{p}{,} \PY{n}{device\PYZus{}type}\PY{p}{,} \PY{n}{category}\PY{p}{,} \PY{n}{date}\PY{p}{,} \PY{n}{country}\PY{p}{,} \PY{n}{limit}\PY{p}{)}\PY{p}{:}  
+            \PY{n}{aux\PYZus{}TopPublishers} \PY{o}{=} \PY{n}{requests}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{https://api.sensortower\PYZhy{}china.com/v1/}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{o}{+}\PY{n}{os}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/top\PYZus{}and\PYZus{}trending/publishers?comparison\PYZus{}attribute=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{comparision\PYZus{}attribute}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}time\PYZus{}range=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{time\PYZus{}range}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}measure=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{measure}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}device\PYZus{}type=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{device\PYZus{}type}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}category=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{category}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{date}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}country=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{country}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}limit=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{limit}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{p}{)}
+            \PY{n}{df\PYZus{}TopPublishers} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{aux\PYZus{}TopPublishers}\PY{o}{.}\PY{n}{json}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+            \PY{n+nb}{print}\PY{p}{(}\PY{n}{aux\PYZus{}TopPublishers}\PY{o}{.}\PY{n}{status\PYZus{}code}\PY{p}{)} \PY{c+c1}{\PYZsh{} Get response messages}
+            \PY{k}{return}\PY{p}{(}\PY{n}{df\PYZus{}TopPublishers}\PY{p}{)}
+        
+        
+        \PY{k}{def} \PY{n+nf}{requests\PYZus{}Android\PYZus{}uni\PYZus{}TopPublishers\PYZus{}periodic}\PY{p}{(}\PY{n}{os}\PY{p}{,}\PY{n}{comparision\PYZus{}attribute}\PY{p}{,} \PY{n}{time\PYZus{}range}\PY{p}{,} \PY{n}{measure}\PY{p}{,} \PY{n}{category}\PY{p}{,} \PY{n}{date}\PY{p}{,} \PY{n}{country}\PY{p}{,} \PY{n}{limit}\PY{p}{)}\PY{p}{:}  
+            \PY{n}{aux\PYZus{}TopPublishers} \PY{o}{=} \PY{n}{requests}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{https://api.sensortower\PYZhy{}china.com/v1/}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{o}{+}\PY{n}{os}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/top\PYZus{}and\PYZus{}trending/publishers?comparison\PYZus{}attribute=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{comparision\PYZus{}attribute}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}time\PYZus{}range=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{time\PYZus{}range}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}measure=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{measure}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}category=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{category}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{date}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}country=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{country}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}limit=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{limit}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{p}{)}
+            \PY{n}{df\PYZus{}TopPublishers} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{aux\PYZus{}TopPublishers}\PY{o}{.}\PY{n}{json}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+            \PY{n+nb}{print}\PY{p}{(}\PY{n}{aux\PYZus{}TopPublishers}\PY{o}{.}\PY{n}{status\PYZus{}code}\PY{p}{)} \PY{c+c1}{\PYZsh{} Get response messages}
+            \PY{k}{return}\PY{p}{(}\PY{n}{df\PYZus{}TopPublishers}\PY{p}{)}
+        
+        
+        
+        \PY{c+c1}{\PYZsh{} Store Summary: Information for all ios or android.}
+        \PY{c+c1}{\PYZsh{} Input:}
+        \PY{c+c1}{\PYZsh{} Output: }
+        
+        
+        \PY{k}{def} \PY{n+nf}{requests\PYZus{}Store\PYZus{}Summary}\PY{p}{(}\PY{n}{os}\PY{p}{,} \PY{n}{category}\PY{p}{,} \PY{n}{country}\PY{p}{,} \PY{n}{granularity}\PY{p}{,} \PY{n}{start\PYZus{}date}\PY{p}{,} \PY{n}{end\PYZus{}date}\PY{p}{)}\PY{p}{:}  
+            \PY{n}{aux\PYZus{}SS} \PY{o}{=} \PY{n}{requests}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{https://api.sensortower\PYZhy{}china.com/v1/}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{o}{+}\PY{n}{os}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/store\PYZus{}summary?categories=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{category}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}countries=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{country}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}date\PYZus{}granularity=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{granularity}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}start\PYZus{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{start\PYZus{}date}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}end\PYZus{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{end\PYZus{}date}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{p}{)}
+            \PY{n}{df\PYZus{}SS} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{aux\PYZus{}SS}\PY{o}{.}\PY{n}{json}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+            \PY{n+nb}{print}\PY{p}{(}\PY{n}{aux\PYZus{}SS}\PY{o}{.}\PY{n}{status\PYZus{}code}\PY{p}{)} \PY{c+c1}{\PYZsh{} Get response messages}
+            \PY{k}{return}\PY{p}{(}\PY{n}{df\PYZus{}SS}\PY{p}{)}
+        
+        \PY{c+c1}{\PYZsh{} Game Breakdown: Information for all ios or android.(games specific)}
+        \PY{c+c1}{\PYZsh{} Input:}
+        \PY{c+c1}{\PYZsh{} Output: }
+        
+        \PY{k}{def} \PY{n+nf}{requests\PYZus{}Games\PYZus{}Breakdown}\PY{p}{(}\PY{n}{os}\PY{p}{,} \PY{n}{category}\PY{p}{,} \PY{n}{country}\PY{p}{,} \PY{n}{granularity}\PY{p}{,} \PY{n}{start\PYZus{}date}\PY{p}{,} \PY{n}{end\PYZus{}date}\PY{p}{)}\PY{p}{:}  
+            \PY{n}{aux\PYZus{}GB} \PY{o}{=} \PY{n}{requests}\PY{o}{.}\PY{n}{get}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{https://api.sensortower\PYZhy{}china.com/v1/}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{o}{+}\PY{n}{os}\PY{o}{+}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{/games\PYZus{}breakdown?categories=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{category}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}countries=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{country}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}date\PYZus{}granularity=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{granularity}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}start\PYZus{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{start\PYZus{}date}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}end\PYZus{}date=}\PY{l+s+s1}{\PYZsq{}}\PY{o}{+}\PY{n}{end\PYZus{}date}\PY{o}{+}
+                                       \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZam{}auth\PYZus{}token=r7cTTJq5nBSqxMU\PYZus{}WmJo}\PY{l+s+s1}{\PYZsq{}}
+                                       \PY{p}{)}
+            \PY{n}{df\PYZus{}GB} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{aux\PYZus{}GB}\PY{o}{.}\PY{n}{json}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+            \PY{n+nb}{print}\PY{p}{(}\PY{n}{aux\PYZus{}GB}\PY{o}{.}\PY{n}{status\PYZus{}code}\PY{p}{)} \PY{c+c1}{\PYZsh{} Get response messages}
+            \PY{k}{return}\PY{p}{(}\PY{n}{df\PYZus{}GB}\PY{p}{)}
+        
+        
+        \PY{c+c1}{\PYZsh{} MAE, MAPE, MSE, RMSE }
+        
+        
+        \PY{c+c1}{\PYZsh{} MAPE(Mean absolute percentage error.) }
+        \PY{k}{def} \PY{n+nf}{MAPE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred}\PY{p}{)}\PY{p}{:} 
+            \PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{y\PYZus{}pred}\PY{p}{)}
+            \PY{k}{return} \PY{n}{np}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{abs}\PY{p}{(}\PY{p}{(}\PY{n}{y\PYZus{}true} \PY{o}{\PYZhy{}} \PY{n}{y\PYZus{}pred}\PY{p}{)} \PY{o}{/} \PY{n}{y\PYZus{}true}\PY{p}{)}\PY{p}{)}
+        
+        \PY{c+c1}{\PYZsh{} MSE(Mean squared error.)}
+        \PY{k}{def} \PY{n+nf}{MSE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred}\PY{p}{)}\PY{p}{:} 
+            \PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{y\PYZus{}pred}\PY{p}{)}
+            \PY{k}{return} \PY{n}{np}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{square}\PY{p}{(}\PY{n}{y\PYZus{}true} \PY{o}{\PYZhy{}} \PY{n}{y\PYZus{}pred}\PY{p}{)}\PY{p}{)}
+        
+        
+        \PY{c+c1}{\PYZsh{} RMSE(root\PYZus{}mean\PYZus{}square\PYZus{}error.)}
+        \PY{k}{def} \PY{n+nf}{RMSE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred}\PY{p}{)}\PY{p}{:} 
+            \PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{y\PYZus{}pred}\PY{p}{)}
+            \PY{k}{return} \PY{n}{np}\PY{o}{.}\PY{n}{sqrt}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{square}\PY{p}{(}\PY{n}{y\PYZus{}true} \PY{o}{\PYZhy{}} \PY{n}{y\PYZus{}pred}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+        
+        \PY{c+c1}{\PYZsh{} MAE(Mean absolute error)}
+        \PY{k}{def} \PY{n+nf}{MAE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred}\PY{p}{)}\PY{p}{:} 
+            \PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}pred} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{n}{y\PYZus{}pred}\PY{p}{)}
+            \PY{k}{return} \PY{n}{np}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{abs}\PY{p}{(}\PY{p}{(}\PY{n}{y\PYZus{}true} \PY{o}{\PYZhy{}} \PY{n}{y\PYZus{}pred}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+        
+        
+        
+        \PY{k}{def} \PY{n+nf}{compare}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}ST\PYZus{}pred}\PY{p}{,} \PY{n}{y\PYZus{}AA\PYZus{}pred}\PY{p}{)}\PY{p}{:}
+            \PY{n}{aux\PYZus{}comparision} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}
+                \PY{p}{\PYZob{}}   \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{A\PYZhy{}Name}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ST}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{AA}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,}
+                    \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{MAPE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{p}{[}\PY{n}{MAPE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}ST\PYZus{}pred}\PY{p}{)}\PY{p}{,} \PY{n}{MAPE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}AA\PYZus{}pred}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+                    \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{MSE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{p}{[}\PY{n}{MSE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}ST\PYZus{}pred}\PY{p}{)}\PY{p}{,} \PY{n}{MSE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}AA\PYZus{}pred}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+                    \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RMSE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{p}{[}\PY{n}{RMSE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}ST\PYZus{}pred}\PY{p}{)}\PY{p}{,} \PY{n}{RMSE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}AA\PYZus{}pred}\PY{p}{)}\PY{p}{]}\PY{p}{,}
+                    \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{MAE}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:} \PY{p}{[}\PY{n}{MAE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}ST\PYZus{}pred}\PY{p}{)}\PY{p}{,} \PY{n}{MAE}\PY{p}{(}\PY{n}{y\PYZus{}true}\PY{p}{,} \PY{n}{y\PYZus{}AA\PYZus{}pred}\PY{p}{)}\PY{p}{]}
+           \PY{p}{\PYZcb{}}\PY{p}{)}
+            \PY{k}{return}\PY{p}{(}\PY{n}{aux\PYZus{}comparision}\PY{p}{)}
+\end{Verbatim}
+
+
+    \section{2）平台游戏下载量比较}\label{ux5e73ux53f0ux6e38ux620fux4e0bux8f7dux91cfux6bd4ux8f83}
+
+\subsection{说明：}\label{ux8bf4ux660e}
+
+\subsection{\texorpdfstring{1\emph{准确性的判断基于折线图与MAE，MAPE，MSE，RMSE四个统计指标进行。其中折线图部分AA代表App
+Annie数据，ST代表 SensorTower
+数据，true代表该游戏真实下载量为自身打点数据.比较方法为根据折线图重合程度进行比较。
+\#\# 2} 折线图下方是统计指标表。AA行表示App
+Annie所获得的四个指标值，ST行表示SensorTower所获得的四个指标值。四个统计指标判断标准为指标数值越小代表该网站预测值准确性越高。}{1准确性的判断基于折线图与MAE，MAPE，MSE，RMSE四个统计指标进行。其中折线图部分AA代表App Annie数据，ST代表 SensorTower 数据，true代表该游戏真实下载量为自身打点数据.比较方法为根据折线图重合程度进行比较。 \#\# 2 折线图下方是统计指标表。AA行表示App Annie所获得的四个指标值，ST行表示SensorTower所获得的四个指标值。四个统计指标判断标准为指标数值越小代表该网站预测值准确性越高。}}\label{ux51c6ux786eux6027ux7684ux5224ux65adux57faux4e8eux6298ux7ebfux56feux4e0emaemapemsermseux56dbux4e2aux7edfux8ba1ux6307ux6807ux8fdbux884cux5176ux4e2dux6298ux7ebfux56feux90e8ux5206aaux4ee3ux8868app-annieux6570ux636estux4ee3ux8868-sensortower-ux6570ux636etrueux4ee3ux8868ux8be5ux6e38ux620fux771fux5b9eux4e0bux8f7dux91cfux4e3aux81eaux8eabux6253ux70b9ux6570ux636e.ux6bd4ux8f83ux65b9ux6cd5ux4e3aux6839ux636eux6298ux7ebfux56feux91cdux5408ux7a0bux5ea6ux8fdbux884cux6bd4ux8f83-2-ux6298ux7ebfux56feux4e0bux65b9ux662fux7edfux8ba1ux6307ux6807ux8868aaux884cux8868ux793aapp-annieux6240ux83b7ux5f97ux7684ux56dbux4e2aux6307ux6807ux503cstux884cux8868ux793asensortowerux6240ux83b7ux5f97ux7684ux56dbux4e2aux6307ux6807ux503cux56dbux4e2aux7edfux8ba1ux6307ux6807ux5224ux65adux6807ux51c6ux4e3aux6307ux6807ux6570ux503cux8d8aux5c0fux4ee3ux8868ux8be5ux7f51ux7ad9ux9884ux6d4bux503cux51c6ux786eux6027ux8d8aux9ad8}
+
+    \section{2.1) Andorid 平台}\label{andorid-ux5e73ux53f0}
+
+\section{Truck them all
+游戏下载量比较}\label{truck-them-all-ux6e38ux620fux4e0bux8f7dux91cfux6bd4ux8f83}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}130}]:} \PY{n}{ta\PYZus{}st} \PY{o}{=} \PY{n}{requests\PYZus{}Download\PYZus{}RevenueEstimates}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{android}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{US}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{daily}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2020\PYZhy{}10\PYZhy{}27}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2021\PYZhy{}1\PYZhy{}6}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{www.huolala.truckemall}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{ta\PYZus{}true} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{TA\PYZus{}true.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{ta\PYZus{}true} \PY{o}{=} \PY{n}{ta\PYZus{}true}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{:}\PY{p}{]}
+          \PY{n}{ta\PYZus{}true} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{ta\PYZus{}true}\PY{p}{)}
+          \PY{n}{ta\PYZus{}true} \PY{o}{=} \PY{n}{ta\PYZus{}true}\PY{o}{.}\PY{n}{reset\PYZus{}index}\PY{p}{(}\PY{n}{drop}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)} \PY{c+c1}{\PYZsh{} 重置index}
+          \PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{ta\PYZus{}true}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{新增用户数}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{ta\PYZus{}AA} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Android\PYZus{}TA\PYZus{}AA.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{ta\PYZus{}AA}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Download}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}
+          
+          
+          \PY{c+c1}{\PYZsh{} subplot(numRows, numCols, plotNum)}
+          \PY{c+c1}{\PYZsh{} }
+          \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{121}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Truck them all Android download(AA vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{122}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ST}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Truck them all Android download(ST vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)} \PY{c+c1}{\PYZsh{} 显示图形}
+          
+          \PY{n+nb}{print}\PY{p}{(}\PY{n}{compare}\PY{p}{(}\PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{ta\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+200
+
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_4_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+  A-Name          MAE      MAPE           MSE         RMSE
+0     ST  2983.888889  0.154627  4.395767e+07  6630.058423
+1     AA  3535.763889  0.178189  6.062325e+07  7786.093666
+
+    \end{Verbatim}
+
+    \subsubsection{基于折线图和四个指标，ST 优于
+AA。但双平台都未能准确预测在2020年11月8日的峰值。}\label{ux57faux4e8eux6298ux7ebfux56feux548cux56dbux4e2aux6307ux6807st-ux4f18ux4e8e-aaux4f46ux53ccux5e73ux53f0ux90fdux672aux80fdux51c6ux786eux9884ux6d4bux57282020ux5e7411ux67088ux65e5ux7684ux5cf0ux503c}
+
+    \section{Wheel offroad
+游戏下载量比较}\label{wheel-offroad-ux6e38ux620fux4e0bux8f7dux91cfux6bd4ux8f83}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}106}]:} \PY{n}{awor\PYZus{}st} \PY{o}{=} \PY{n}{requests\PYZus{}Download\PYZus{}RevenueEstimates}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{android}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{US}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{daily}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2020\PYZhy{}12\PYZhy{}25}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2021\PYZhy{}3\PYZhy{}1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{www.wheelroad.wheeloffroad}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{awor\PYZus{}true} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{wheelaoffroad\PYZhy{}an.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{awor\PYZus{}true}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{下载量}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{AWOR\PYZus{}AA} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Android\PYZus{}WOR\PYZus{}AA.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{AWOR\PYZus{}AA}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Download}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}
+          \PY{n}{awor\PYZus{}st} \PY{o}{=} \PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}
+          
+          \PY{c+c1}{\PYZsh{} subplot(numRows, numCols, plotNum)}
+          \PY{c+c1}{\PYZsh{} }
+          \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{121}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Wheel offroad Android download(AA vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{122}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ST}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Wheel offroad Android download(ST vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)} \PY{c+c1}{\PYZsh{} 显示图形}
+          
+          \PY{n+nb}{print}\PY{p}{(}\PY{n}{compare}\PY{p}{(}\PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{awor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+200
+
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_7_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+  A-Name          MAE      MAPE           MSE         RMSE
+0     ST   770.696970  0.634357  1.687693e+06  1299.112249
+1     AA  1023.166667  0.773124  2.946179e+06  1716.443579
+
+    \end{Verbatim}
+
+    \subsubsection{基于折线图和四个指标，ST 优于
+AA。}\label{ux57faux4e8eux6298ux7ebfux56feux548cux56dbux4e2aux6307ux6807st-ux4f18ux4e8e-aa}
+
+    \section{stunt car jumping
+游戏下载量比较}\label{stunt-car-jumping-ux6e38ux620fux4e0bux8f7dux91cfux6bd4ux8f83}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}108}]:} \PY{n}{scj\PYZus{}st} \PY{o}{=} \PY{n}{requests\PYZus{}Download\PYZus{}RevenueEstimates}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{android}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{US}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{daily}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2020\PYZhy{}11\PYZhy{}30}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2021\PYZhy{}3\PYZhy{}1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{www.stunt.stuntcarjumping}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{scj\PYZus{}true} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{jetcar3d\PYZhy{}an.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{scj\PYZus{}true}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{下载量}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{SCJ\PYZus{}AA} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Android\PYZus{}SCJ\PYZus{}AA.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{SCJ\PYZus{}AA}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Download}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}
+          
+          \PY{c+c1}{\PYZsh{} subplot(numRows, numCols, plotNum)}
+          \PY{c+c1}{\PYZsh{} }
+          \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{121}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{stunt car jumping Android download(AA vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{122}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ST}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{stunt car jumping Android download(ST vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)} \PY{c+c1}{\PYZsh{} 显示图形}
+          
+          \PY{n+nb}{print}\PY{p}{(}\PY{n}{compare}\PY{p}{(}\PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{scj\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+200
+
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_10_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+  A-Name          MAE      MAPE           MSE         RMSE
+0     ST  1312.423913  0.242487  3.146091e+06  1773.722330
+1     AA  1617.043478  0.293869  5.250690e+06  2291.438494
+
+    \end{Verbatim}
+
+    \subsubsection{基于折线图和四个指标，ST 优于
+AA。但双平台都高估了在2020年12月5号出在的峰值。}\label{ux57faux4e8eux6298ux7ebfux56feux548cux56dbux4e2aux6307ux6807st-ux4f18ux4e8e-aaux4f46ux53ccux5e73ux53f0ux90fdux9ad8ux4f30ux4e86ux57282020ux5e7412ux67085ux53f7ux51faux5728ux7684ux5cf0ux503c}
+
+    \section{2.2) iOS 平台}\label{ios-ux5e73ux53f0}
+
+\section{Crash Race.io
+游戏下载量比较}\label{crash-race.io-ux6e38ux620fux4e0bux8f7dux91cfux6bd4ux8f83}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}109}]:} \PY{n}{cr\PYZus{}st} \PY{o}{=} \PY{n}{requests\PYZus{}Download\PYZus{}RevenueEstimates}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ios}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{US}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{daily}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2020\PYZhy{}11\PYZhy{}30}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2021\PYZhy{}3\PYZhy{}1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1515691347}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{au}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{+} \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{iu}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{CR\PYZus{}true} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{crashrace.io\PYZhy{}ios.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{CR\PYZus{}true}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{下载量}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{CR\PYZus{}AA} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{iOS\PYZus{}CR\PYZus{}AA.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{CR\PYZus{}AA}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Download}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{93}\PY{p}{)}\PY{p}{]}
+          
+          \PY{c+c1}{\PYZsh{} subplot(numRows, numCols, plotNum)}
+          \PY{c+c1}{\PYZsh{} }
+          \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{121}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Crash Race.io ios download(AA vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{122}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ST}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Crash Race.io ios download(ST vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)} \PY{c+c1}{\PYZsh{} 显示图形}
+          
+          \PY{n+nb}{print}\PY{p}{(}\PY{n}{compare}\PY{p}{(}\PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{cr\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+200
+
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_13_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+  A-Name         MAE      MAPE            MSE        RMSE
+0     ST  350.494505  0.169170  172626.824176  415.483843
+1     AA  137.351648  0.066881   34161.175824  184.827422
+
+    \end{Verbatim}
+
+    \subsubsection{基于折线图和四个指标，AA 明显优于
+ST。}\label{ux57faux4e8eux6298ux7ebfux56feux548cux56dbux4e2aux6307ux6807aa-ux660eux663eux4f18ux4e8e-st}
+
+    \section{Wheel offroad
+游戏下载量比较}\label{wheel-offroad-ux6e38ux620fux4e0bux8f7dux91cfux6bd4ux8f83}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}110}]:} \PY{n}{wor\PYZus{}st} \PY{o}{=} \PY{n}{requests\PYZus{}Download\PYZus{}RevenueEstimates}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ios}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{US}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{daily}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2021\PYZhy{}2\PYZhy{}7}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2021\PYZhy{}3\PYZhy{}1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1550052723}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{au}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{+} \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{iu}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{WOR\PYZus{}true} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{wheelaoffroad\PYZhy{}ios.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{WOR\PYZus{}true}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{下载量}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{WOR\PYZus{}AA} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{iOS\PYZus{}WOR\PYZus{}AA.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{WOR\PYZus{}AA}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Download}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}
+          
+          \PY{c+c1}{\PYZsh{} subplot(numRows, numCols, plotNum)}
+          \PY{c+c1}{\PYZsh{} }
+          \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{121}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Wheel offroad ios download(AA vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{122}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ST}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Wheel offroad ios download(ST vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)} \PY{c+c1}{\PYZsh{} 显示图形}
+          
+          \PY{n+nb}{print}\PY{p}{(}\PY{n}{compare}\PY{p}{(}\PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{wor\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+200
+
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_16_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+  A-Name         MAE      MAPE           MSE         RMSE
+0     ST  821.454545  0.136766  1.052603e+06  1025.964203
+1     AA  859.909091  0.132373  1.334561e+06  1155.231815
+
+    \end{Verbatim}
+
+    \subsubsection{基于折线图和四个指标，AA与ST并无明显差异。其可能原因是样本数据量太小。}\label{ux57faux4e8eux6298ux7ebfux56feux548cux56dbux4e2aux6307ux6807aaux4e0estux5e76ux65e0ux660eux663eux5deeux5f02ux5176ux53efux80fdux539fux56e0ux662fux6837ux672cux6570ux636eux91cfux592aux5c0f}
+
+    \section{Jet car 3D
+游戏下载量比较}\label{jet-car-3d-ux6e38ux620fux4e0bux8f7dux91cfux6bd4ux8f83}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}112}]:} \PY{n}{jc\PYZus{}st} \PY{o}{=} \PY{n}{requests\PYZus{}Download\PYZus{}RevenueEstimates}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ios}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{US}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{daily}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2020\PYZhy{}11\PYZhy{}30}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2021\PYZhy{}3\PYZhy{}1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{1519399656}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{au}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{+} \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{iu}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          
+          \PY{n}{jc\PYZus{}true} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{jetcar3d\PYZhy{}ios.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{jc\PYZus{}true}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{下载量}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          
+          \PY{n}{JC\PYZus{}AA} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}excel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{iOS\PYZus{}JC\PYZus{}AA.xlsx}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{JC\PYZus{}AA}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Download}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+          \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}
+          
+          \PY{c+c1}{\PYZsh{} subplot(numRows, numCols, plotNum)}
+          \PY{c+c1}{\PYZsh{} }
+          \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{121}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Jet Car 3D ios download(AA vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          
+          \PY{n}{plt}\PY{o}{.}\PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{122}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ST}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{count}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{.\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Jet Car 3D ios download(ST vs TRUE)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Downloads}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+          \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)} \PY{c+c1}{\PYZsh{} 显示图形}
+          
+          \PY{n+nb}{print}\PY{p}{(}\PY{n}{compare}\PY{p}{(}\PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{true}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{u}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{jc\PYZus{}st}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+200
+
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_19_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+  A-Name         MAE      MAPE            MSE        RMSE
+0     ST  604.131868  0.179989  464393.648352  681.464341
+1     AA  288.802198  0.082077  137497.043956  370.805938
+
+    \end{Verbatim}
+
+    \subsubsection{基于折线图和四个指标，AA 明显优于
+ST。}\label{ux57faux4e8eux6298ux7ebfux56feux548cux56dbux4e2aux6307ux6807aa-ux660eux663eux4f18ux4e8e-st}
+
+
+    % Add a bibliography block to the postdoc
+    
+    
+    
+    \end{document}
