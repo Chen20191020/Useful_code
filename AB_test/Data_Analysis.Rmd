@@ -1,0 +1,655 @@
+---
+title: "AB test Report（数据中台内部使用）"
+author: "Chen"
+date: "4/20/2021"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+
+#Demo数据说明：选取2021.4.7安装WOR 1.2.4和1.2.5版本的用户在2021.4.7---2021.4.13的数据，选择用户日平均广告点击总次数（total）作为metric。选择首日（4.7），两日（4.7加4.8），三日（4.7加4.8加4.9）数据做AB test 
+
+#数据问题说明：当存在某个用户在做AB test测试期间变化了版本，此demo没有计算此类用户变化版本后的广告点击次数。在实际做AB test时，应该将此类用户变化版本后的广告点击次数计算在变化后的版本中。该问题会出现在使用Google AB test分群时，如果使用自己的打点数据将没有此问题。 
+
+
+# install package 安装AB test所需包
+```{r}
+options(repos="https://cran.rstudio.com")
+library(lme4)
+library(Matrix)
+library(ggplot2)
+library(stats)
+options(contrasts = c("contr.treatment", "contr.poly"))
+library(lmerTest)
+library(lmtest)
+library(car)
+library(MASS)
+library(jtrans)
+library(stargazer)
+library(WRS2)
+library(pwr)
+library(gganimate)
+library(gapminder)
+library(effsize)
+library(DescTools)
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(coin)
+library(psych)
+```
+
+# 读取和打印数据，作图描述样本情况
+```{r}
+v124125 <- read.csv("C:/Users/chenq/Desktop/AB_test_WOR/124125.csv") # typeof(v124125)
+attach(v124125)
+head(v124125)
+describe(v124125[which(end_date == '2021-04-07'), ])
+v124125$app_version <- as.factor(app_version)
+
+# 交互作用图
+ggplot() +
+  aes(x = app_version,  color = end_date, group = end_date, y = total) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line") +
+  labs(title="interaction plot", 
+       subtitle="Total across app_version by date") 
+
+# 频率直方图(去掉广告点击次数为0的用户)
+g <- ggplot(v124125[which(end_date == '2021-04-07' & total != 0), ], aes(total))
+g + geom_bar(aes(fill= app_version), width = 3, breaks=seq(0, 400, by=1)) +
+  labs(title="Histogram on total", 
+       subtitle="Total across app_version") 
+
+# 概率密度分布图
+g <- ggplot(v124125[which(end_date == '2021-04-07'), ], aes(total))
+g + geom_density(aes(fill=factor(app_version)), alpha=0.5) + 
+    labs(title="Density plot", 
+         subtitle="Total app_version by Number of toal",
+         x="total",
+         fill="app_version")
+
+# 箱型图（全部样本但去掉广告点击次数为0的用户）， 去掉0值是为了图像展示更清晰，也可选择不去除0。
+g <- ggplot(v124125[which(end_date == '2021-04-07' & total != 0), ], aes(app_version, total))
+g + geom_boxplot(fill="plum") + 
+    labs(title="Box plot", 
+         subtitle="total by app version",
+         x="app version",
+         y="total")
+
+# 箱型图（点击次数小于等于26大于0的样本），此处选择26是为了方便图像展示，该数值可任意选择。 
+g <- ggplot(v124125[which(end_date == '2021-04-07' & total <= 26), ], aes(app_version, total))
+g + geom_boxplot(fill="plum") + 
+    labs(title="Box plot", 
+         subtitle="total by app version",
+         x="app version",
+         y="total <= 26")
+
+# 箱型图（点击次数大于26的样本）
+g <- ggplot(v124125[which(end_date == '2021-04-07' & total > 26), ], aes(app_version, total))
+g + geom_boxplot(fill="plum") + 
+    labs(title="Box plot", 
+         subtitle="total by app version",
+         x="app version",
+         y="total > 26")
+
+```
+
+#首先做levene test判断两组样本方差是否一样, 一致的情况下使用pooled variance做2 sample t test， 不一致的情况下使用 welch approximation做welch test。考虑每次实际test的sample size不相同，welch test在此时可能更为适用，所以在不拒绝levene test的情况下t test和welch test的结果都合理。注意：如果metric选择不为均值，需要做normality 检验，选择qq-plot和ks检验normality即可。   
+```{r}
+
+sqrt(var(v124125[which(end_date == '2021-04-07' & app_version == '1.2.4'), ]$total)) #1.2.4样本标准差
+sqrt(var(v124125[which(end_date == '2021-04-07' & app_version == '1.2.5'), ]$total)) #1.2.5样本标准差
+# 在显著水平0.05的情况下，结果显示两组方差无显著性差异
+res <- leveneTest(total ~ app_version, data = v124125[which(end_date == '2021-04-07'), ], center = 'mean')
+res
+
+sqrt(var(v124125[which(end_date == '2021-04-08' & app_version == '1.2.4'), ]$total)) #1.2.4样本标准差
+sqrt(var(v124125[which(end_date == '2021-04-08' & app_version == '1.2.5'), ]$total)) #1.2.5样本标准差
+# 在显著水平0.05的情况下，结果显示两组方差无显著性差异
+res <- leveneTest(total ~ app_version, data = v124125[which(end_date == '2021-04-08'), ], center = 'mean')
+res
+
+sqrt(var(v124125[which(end_date == '2021-04-09' & app_version == '1.2.4'), ]$total)) #1.2.4样本标准差
+sqrt(var(v124125[which(end_date == '2021-04-09' & app_version == '1.2.5'), ]$total)) #1.2.5样本标准差
+# 在显著水平0.05的情况下，结果显示两组方差无显著性差异
+res <- leveneTest(total ~ app_version, data = v124125[which(end_date == '2021-04-09'), ], center = 'mean')
+res
+```
+
+#在连续多天的AB test中考虑是否需要Bonferroni correction。如果不使用，错误拒绝原假设的概率会提高，也就是说更可能在不存在显著性差异的情况下得到存在显著性差异的结果。该方法会非常保守的做出结论，往往需要mean的差距大到一定量才会拒绝原假设。 
+\
+#在做单边检验时把原假设（H0）设定为没有充分理由不能轻易否定的命题，把备选假设（H1）设定为没有把握不能轻易肯定的命题。
+```{r}
+attach(v124125)
+# 两个版本平均值差距
+mu <- abs(mean(v124125[which(end_date == '2021-04-07' & app_version == '1.2.4'), ]$total) - mean(v124125[which(end_date == '2021-04-07' & app_version == '1.2.5'), ]$total))
+mu 
+v124 <- v124125[which(end_date == '2021-04-07' & app_version == '1.2.4'), ]$total
+v125 <- v124125[which(end_date == '2021-04-07' & app_version == '1.2.5'), ]$total
+
+# t student test  H0: 1.2.4 - 1.2.5 >= 0    H1： 1.2.4 - 1.2.5 < 0
+res <- t.test(total ~ app_version, data = v124125[which(end_date == '2021-04-07'), ], var.equal = TRUE, alternative = "less")
+res
+# 我们相信mu的值（1.2.4 - 1.2.5）落在负无穷到0.618的概率有95%, 而且只有当差值达到1.5时才可以拒绝原假设。
+
+# welch test H0: 1.2.4 - 1.2.5 >= 0 
+res <- t.test(total ~ app_version, data = v124125[which(end_date == '2021-04-07'), ], var.equal = FALSE, alternative = "less")
+res 
+
+# Cohen's d, 效果大小值将向我们显示该因子对我的指标产生的是小，中还是大影响。
+cohend <- effsize::cohen.d(total ~ app_version, alternative =  "less", data = v124125[which(end_date == '2021-04-07'), ])
+d <- abs(cohend$estimate)
+cohend
+
+# power of test，当H1为真时，正确拒绝H0的概率
+n1 <- length(v124125[which(end_date == '2021-04-07' & app_version == '1.2.4'), ]$total)
+n2 <- length(v124125[which(end_date == '2021-04-07' & app_version == '1.2.5'), ]$total)
+p <- pwr.t2n.test(n1, n2, d = d, 0.05,alternative = "less")
+p$power
+
+# pwr.t.test(d= d, sig.level=0.05, power=0.20, type="two.sample", alternative="less")
+
+# 加入2021-04-08和2021-04-09同理,原假设没有更改。 
+
+# 2021-04-08
+# t student test
+res <- t.test(total ~ app_version, data = v124125[which(end_date == '2021-04-08'), ], var.equal = TRUE, alternative = "less")
+res
+# welch test 
+res <- t.test(total ~ app_version, data = v124125[which(end_date == '2021-04-08'), ], var.equal = FALSE， alternative = "less")
+res 
+
+cohend <- effsize::cohen.d(total ~ app_version,  alternative =  "less",data = v124125[which(end_date == '2021-04-08'), ])
+d <- abs(cohend$estimate)
+cohend
+# d
+
+p <- pwr.t2n.test(n1, n2, d = d, 0.05,alternative = "less")
+p$power
+
+# pwr.t.test(d= d, sig.level=0.05, power=0.50, type="two.sample", alternative="less")
+
+# 2021-04-09
+# t student test
+res <- t.test(total ~ app_version, data = v124125[which(end_date == '2021-04-09'), ], var.equal = TRUE, alternative = "less")
+res
+
+# welch test 
+res <- t.test(total ~ app_version, data = v124125[which(end_date == '2021-04-09'), ], var.equal = FALSE, alternative = "less")
+res 
+
+cohend <- effsize::cohen.d(total ~ app_version, alternative =  "less", data = v124125[which(end_date == '2021-04-09'), ])
+d <- abs(cohend$estimate)
+cohend
+#d
+p <- pwr.t2n.test(n1, n2, d = d, 0.05,alternative = "less")
+p$power
+
+# pwr.t.test(d= d, sig.level=0.05, power=0.50, type="two.sample", alternative="less")
+
+```
+
+
+
+
+#如果t student test的结果不好（比如如上检验结果所示power很低，effect size很低），就要使用无参数检验。无参数检验的power比较难算并且一般会比参数检验的power要小。但如果上面参数检验得出的power过小。此种情况选择无参数检验较好。
+```{r}
+# non parametric test H0:1.2.4 - 1.2.5 >= 0 H1: 1.2.4 -1.2.5 < 0
+
+stat.test <- wilcox_test(total ~ app_version, alternative = "less", data = v124125[which(end_date == '2021-04-07'), ]) %>%
+  add_significance()
+stat.test
+
+v124125[which(end_date == '2021-04-07'), ] %>% wilcox_effsize(total ~ app_version, alternative = "less")
+
+# non parametric test
+
+stat.test <- wilcox_test(total ~ app_version, alternative = "less", data = v124125[which(end_date == '2021-04-08'), ]) %>%
+  add_significance()
+stat.test
+
+v124125[which(end_date == '2021-04-08'), ] %>% wilcox_effsize(total ~ app_version, alternative = "less")
+
+
+# non parametric test
+stat.test <- wilcox_test(total ~ app_version, alternative = "less", data = v124125[which(end_date == '2021-04-09'), ]) %>%
+  add_significance()
+stat.test
+
+v124125[which(end_date == '2021-04-09'), ] %>% wilcox_effsize(total ~ app_version, alternative = "less")
+```
+
+
+# winsorization data(选择10%或20%进行winsorising),其基本原理是把outlier值的影响变小。
+# 2021-04-07
+```{r}
+# 10% winsorization 
+wt4 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-07' & app_version == '1.2.4'), ]$total, probs = c(0.05, 0.95))
+wt5 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-07' & app_version == '1.2.5'), ]$total, probs = c(0.05, 0.95))
+
+winsor  <- v124125[which(end_date == '2021-04-07'), ]
+attach(winsor)
+winsor[which(app_version == '1.2.4'), ]$total <- wt4
+winsor[which(app_version == '1.2.5'), ]$total <- wt5
+winsor$app_version <- as.factor(app_version)
+
+ggplot(winsor) +
+  aes(x = app_version,  color = end_date, group = end_date, y = total) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line")
+
+g <- ggplot(winsor, aes(total))
+g + geom_bar(aes(fill= app_version), width = 3, breaks=seq(0, 400, by=1)) +
+  labs(title="Histogram on total", 
+       subtitle="Total across app_version") 
+
+g <- ggplot(winsor, aes(total))
+g + geom_density(aes(fill=factor(app_version)), alpha=0.5) + 
+    labs(title="Density plot", 
+         subtitle="Total app_version by Number of toal",
+         x="total",
+         fill="app_version")
+
+g <- ggplot(winsor, aes(app_version, total))
+g + geom_boxplot(fill="plum") + 
+    labs(title="Box plot", 
+         subtitle="total by app version",
+         x="app version",
+         y="total")
+
+sqrt(var(winsor[which(app_version == '1.2.4'), ]$total))
+sqrt(var(winsor[which(app_version == '1.2.5'), ]$total))
+
+# Levene test
+res <- leveneTest(total ~ app_version, data = winsor, center = 'mean')
+res
+
+
+# t test
+res <- t.test(total ~ app_version, data = winsor, var.equal = TRUE, alternative = "less")
+res
+
+# welch test 
+res <- t.test(total ~ app_version, data = winsor, var.equal = FALSE, alternative = "less")
+res 
+
+# Cohen's d
+cohend <- effsize::cohen.d(total ~ app_version,  alternative =  "less",data = winsor)
+d <- abs(cohend$estimate)
+cohend
+# d
+
+# power of test 
+n1 <- length(winsor[which(app_version == '1.2.4'), ]$total)
+n2 <- length(winsor[which(app_version == '1.2.5'), ]$total)
+p <- pwr.t2n.test(n1, n2, d = d, 0.05, alternative="less")
+p$power
+
+# pwr.t.test(d= d, sig.level=0.05, power=0.80, type="two.sample", alternative="less")
+
+# non parametric test
+
+stat.test <- wilcox_test(total ~ app_version, alternative = "less", data = winsor) %>%
+  add_significance()
+stat.test
+
+winsor %>% wilcox_effsize(total ~ app_version, alternative = "less")
+
+# 20% winsorization 
+wt4 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-07' & app_version == '1.2.4'), ]$total, probs = c(0.1, 0.9))
+wt5 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-07' & app_version == '1.2.5'), ]$total, probs = c(0.1, 0.9))
+winsor  <- v124125[which(end_date == '2021-04-07'), ]
+attach(winsor)
+winsor[which(app_version == '1.2.4'), ]$total <- wt4
+winsor[which(app_version == '1.2.5'), ]$total <- wt5
+winsor$app_version <- as.factor(app_version)
+
+ggplot(winsor) +
+  aes(x = app_version,  color = end_date, group = end_date, y = total) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line")
+
+g <- ggplot(winsor, aes(total))
+g + geom_bar(aes(fill= app_version), width = 3, breaks=seq(0, 400, by=1)) +
+  labs(title="Histogram on total", 
+       subtitle="Total across app_version") 
+
+g <- ggplot(winsor, aes(total))
+g + geom_density(aes(fill=factor(app_version)), alpha=0.5) + 
+    labs(title="Density plot", 
+         subtitle="Total app_version by Number of toal",
+         x="total",
+         fill="app_version")
+
+g <- ggplot(winsor, aes(app_version, total))
+g + geom_boxplot(fill="plum") + 
+    labs(title="Box plot", 
+         subtitle="total by app version",
+         x="app version",
+         y="total")
+
+sqrt(var(winsor[which(app_version == '1.2.4'), ]$total))
+sqrt(var(winsor[which(app_version == '1.2.5'), ]$total))
+
+#levene test
+res <- leveneTest(total ~ app_version, data = winsor, center = 'mean')
+res
+
+
+# t test
+res <- t.test(total ~ app_version, data = winsor, var.equal = TRUE, alternative = "less")
+res
+# welch test 
+res <- t.test(total ~ app_version, data = winsor, var.equal = FALSE, alternative = "less")
+res 
+
+# Cohen's d 
+cohend <- effsize::cohen.d(total ~ app_version,  alternative =  "less",data = winsor)
+d <- abs(cohend$estimate)
+cohend
+# d
+
+# power of test 
+n1 <- length(winsor[which(app_version == '1.2.4'), ]$total)
+n2 <- length(winsor[which(app_version == '1.2.5'), ]$total)
+p <- pwr.t2n.test(n1, n2, d = d, 0.05, alternative = "less")
+p$power
+
+# pwr.t.test(d= d, sig.level=0.05, power=0.80, type="two.sample", alternative="less")
+
+# non parametric test
+stat.test <- wilcox_test(total ~ app_version, alternative = "less", data = winsor) %>%
+  add_significance()
+stat.test
+
+winsor %>% wilcox_effsize(total ~ app_version, alternative = "less")
+```
+
+# 2021-04-08
+```{r}
+# 10% winsorization
+attach(v124125)
+wt4 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-08' & app_version == '1.2.4'), ]$total, probs = c(0.05, 0.95))
+wt5 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-08' & app_version == '1.2.5'), ]$total, probs = c(0.05, 0.95))
+
+winsor  <- v124125[which(end_date == '2021-04-08'), ]
+attach(winsor)
+winsor[which(app_version == '1.2.4'), ]$total <- wt4
+winsor[which(app_version == '1.2.5'), ]$total <- wt5
+winsor$app_version <- as.factor(app_version)
+
+ggplot(winsor) +
+  aes(x = app_version,  color = end_date, group = end_date, y = total) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line")
+
+g <- ggplot(winsor, aes(total))
+g + geom_bar(aes(fill= app_version), width = 3, breaks=seq(0, 400, by=1)) +
+  labs(title="Histogram on total", 
+       subtitle="Total across app_version") 
+
+g <- ggplot(winsor, aes(total))
+g + geom_density(aes(fill=factor(app_version)), alpha=0.5) + 
+    labs(title="Density plot", 
+         subtitle="Total app_version by Number of toal",
+         x="total",
+         fill="app_version")
+
+g <- ggplot(winsor, aes(app_version, total))
+g + geom_boxplot(fill="plum") + 
+    labs(title="Box plot", 
+         subtitle="total by app version",
+         x="app version",
+         y="total")
+
+sqrt(var(winsor[which(app_version == '1.2.4'), ]$total))
+sqrt(var(winsor[which(app_version == '1.2.5'), ]$total))
+
+#levene test
+res <- leveneTest(total ~ app_version, data = winsor, center = 'mean')
+res
+
+# t test
+res <- t.test(total ~ app_version, data = winsor, var.equal = TRUE, alternative = "less")
+res
+# welch test 
+res <- t.test(total ~ app_version, data = winsor, var.equal = FALSE, alternative = "less")
+res 
+
+# Cohen's d
+cohend <- effsize::cohen.d(total ~ app_version, alternative =  "less", data = winsor)
+d <- abs(cohend$estimate)
+cohend
+# d
+
+# power of test 
+n1 <- length(winsor[which(app_version == '1.2.4'), ]$total)
+n2 <- length(winsor[which(app_version == '1.2.5'), ]$total)
+p <- pwr.t2n.test(n1, n2, d = d, 0.05, alternative = "less")
+p$power
+
+# pwr.t.test(d= d, sig.level=0.05, power=0.80, type="two.sample", alternative="less")
+
+# non parametric test
+stat.test <- wilcox_test(total ~ app_version, alternative = "less", data = winsor) %>%
+  add_significance()
+stat.test
+
+winsor %>% wilcox_effsize(total ~ app_version, alternative = "less")
+
+# 20% winsorization 
+wt4 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-08' & app_version == '1.2.4'), ]$total, probs = c(0.1, 0.9))
+wt5 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-08' & app_version == '1.2.5'), ]$total, probs = c(0.1, 0.9))
+winsor  <- v124125[which(end_date == '2021-04-08'), ]
+attach(winsor)
+winsor[which(app_version == '1.2.4'), ]$total <- wt4
+winsor[which(app_version == '1.2.5'), ]$total <- wt5
+winsor$app_version <- as.factor(app_version)
+
+ggplot(winsor) +
+  aes(x = app_version,  color = end_date, group = end_date, y = total) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line")
+
+g <- ggplot(winsor, aes(total))
+g + geom_bar(aes(fill= app_version), width = 3, breaks=seq(0, 400, by=1)) +
+  labs(title="Histogram on total", 
+       subtitle="Total across app_version") 
+
+g <- ggplot(winsor, aes(total))
+g + geom_density(aes(fill=factor(app_version)), alpha=0.5) + 
+    labs(title="Density plot", 
+         subtitle="Total app_version by Number of toal",
+         x="total",
+         fill="app_version")
+
+g <- ggplot(winsor, aes(app_version, total))
+g + geom_boxplot(fill="plum") + 
+    labs(title="Box plot", 
+         subtitle="total by app version",
+         x="app version",
+         y="total")
+
+sqrt(var(winsor[which(app_version == '1.2.4'), ]$total))
+sqrt(var(winsor[which(app_version == '1.2.5'), ]$total))
+#levene test
+res <- leveneTest(total ~ app_version, data = winsor, center = 'mean')
+res
+
+
+# t test
+res <- t.test(total ~ app_version, data = winsor, var.equal = TRUE, alternative = "less")
+res
+
+# welch test 
+res <- t.test(total ~ app_version, data = winsor, var.equal = FALSE, alternative = "less")
+res 
+
+# Cohen's d.
+cohend <- effsize::cohen.d(total ~ app_version, alternative =  "less", data = winsor)
+d <- abs(cohend$estimate)
+cohend
+# d
+
+# power of test 
+n1 <- length(winsor[which(app_version == '1.2.4'), ]$total)
+n2 <- length(winsor[which(app_version == '1.2.5'), ]$total)
+p <- pwr.t2n.test(n1, n2, d = d, 0.05, alternative = "less")
+p$power
+
+# pwr.t.test(d= d, sig.level=0.05, power=0.80, type="two.sample", alternative="less")
+
+# non parametric test
+stat.test <- wilcox_test(total ~ app_version, alternative = "less", data = winsor) %>%
+  add_significance()
+stat.test
+
+winsor %>% wilcox_effsize(total ~ app_version, alternative = "less")
+```
+
+
+# 2021-04-09
+```{r}
+# 10% winsorization 
+attach(v124125)
+wt4 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-09' & app_version == '1.2.4'), ]$total, probs = c(0.05, 0.95))
+wt5 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-09' & app_version == '1.2.5'), ]$total, probs = c(0.05, 0.95))
+
+winsor  <- v124125[which(end_date == '2021-04-09'), ]
+attach(winsor)
+winsor[which(app_version == '1.2.4'), ]$total <- wt4
+winsor[which(app_version == '1.2.5'), ]$total <- wt5
+winsor$app_version <- as.factor(app_version)
+
+ggplot(winsor) +
+  aes(x = app_version,  color = end_date, group = end_date, y = total) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line")
+
+g <- ggplot(winsor, aes(total))
+g + geom_bar(aes(fill= app_version), width = 3, breaks=seq(0, 400, by=1)) +
+  labs(title="Histogram on total", 
+       subtitle="Total across app_version") 
+
+g <- ggplot(winsor, aes(total))
+g + geom_density(aes(fill=factor(app_version)), alpha=0.5) + 
+    labs(title="Density plot", 
+         subtitle="Total app_version by Number of toal",
+         x="total",
+         fill="app_version")
+
+g <- ggplot(winsor, aes(app_version, total))
+g + geom_boxplot(fill="plum") + 
+    labs(title="Box plot", 
+         subtitle="total by app version",
+         x="app version",
+         y="total")
+
+sqrt(var(winsor[which(app_version == '1.2.4'), ]$total))
+sqrt(var(winsor[which(app_version == '1.2.5'), ]$total))
+# levene test
+res <- leveneTest(total ~ app_version, data = winsor, center = 'mean')
+res
+
+
+# t test
+res <- t.test(total ~ app_version, data = winsor, var.equal = TRUE, alternative = "less")
+res
+# welch test 
+res <- t.test(total ~ app_version, data = winsor, var.equal = FALSE, alternative = "less")
+res 
+
+# Cohen's d
+cohend <- effsize::cohen.d(total ~ app_version, alternative =  "less", data = winsor)
+d <- abs(cohend$estimate)
+cohend
+# d
+
+# power of test 
+n1 <- length(winsor[which(app_version == '1.2.4'), ]$total)
+n2 <- length(winsor[which(app_version == '1.2.5'), ]$total)
+p <- pwr.t2n.test(n1, n2, d = d, 0.05, alternative = "less")
+p$power
+
+# pwr.t.test(d= d, sig.level=0.05, power=0.80, type="two.sample", alternative="less")
+
+# non parametric test
+stat.test <- wilcox_test(total ~ app_version, alternative = "less", data = winsor) %>%
+  add_significance()
+stat.test
+
+winsor %>% wilcox_effsize(total ~ app_version, alternative = "less")
+
+# 20% winsorization 
+wt4 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-09' & app_version == '1.2.4'), ]$total, probs = c(0.1, 0.9))
+wt5 <- DescTools::Winsorize(v124125[which(end_date == '2021-04-09' & app_version == '1.2.5'), ]$total, probs = c(0.1, 0.9))
+winsor  <- v124125[which(end_date == '2021-04-09'), ]
+attach(winsor)
+winsor[which(app_version == '1.2.4'), ]$total <- wt4
+winsor[which(app_version == '1.2.5'), ]$total <- wt5
+winsor$app_version <- as.factor(app_version)
+
+ggplot(winsor) +
+  aes(x = app_version,  color = end_date, group = end_date, y = total) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line")
+
+g <- ggplot(winsor, aes(total))
+g + geom_bar(aes(fill= app_version), width = 3, breaks=seq(0, 400, by=1)) +
+  labs(title="Histogram on total", 
+       subtitle="Total across app_version") 
+
+g <- ggplot(winsor, aes(total))
+g + geom_density(aes(fill=factor(app_version)), alpha=0.5) + 
+    labs(title="Density plot", 
+         subtitle="Total app_version by Number of toal",
+         x="total",
+         fill="app_version")
+
+g <- ggplot(winsor, aes(app_version, total))
+g + geom_boxplot(fill="plum") + 
+    labs(title="Box plot", 
+         subtitle="total by app version",
+         x="app version",
+         y="total")
+
+sqrt(var(winsor[which(app_version == '1.2.4'), ]$total))
+sqrt(var(winsor[which(app_version == '1.2.5'), ]$total))
+#levene test
+res <- leveneTest(total ~ app_version, data = winsor, center = 'mean')
+res
+
+
+# t test
+res <- t.test(total ~ app_version, data = winsor, var.equal = TRUE, alternative = "less")
+res
+# welch test 
+res <- t.test(total ~ app_version, data = winsor, var.equal = FALSE, alternative = "less")
+res 
+
+# Cohen's d
+cohend <- effsize::cohen.d(total ~ app_version, alternative =  "less", data = winsor)
+d <- abs(cohend$estimate)
+cohend
+# d
+
+# power of test 
+n1 <- length(winsor[which(app_version == '1.2.4'), ]$total)
+n2 <- length(winsor[which(app_version == '1.2.5'), ]$total)
+p <- pwr.t2n.test(n1, n2, d = d, 0.05, alternative = "less")
+p$power
+
+# pwr.t.test(d= d, sig.level=0.05, power=0.80, type="two.sample", alternative="less")
+
+# non parametric test
+stat.test <- wilcox_test(total ~ app_version, alternative = "less", data = winsor) %>%
+  add_significance()
+stat.test
+
+winsor %>% wilcox_effsize(total ~ app_version, alternative = "less")
+```
+
+#结论：因为参数统计的power和效应量都非常小不能作为此处AB test的方法，所以选择非参数统计方法。依据非参数统计的test结果显示，在显著性水平95%的情况下，1.2.4和1.2.5版本的平均广告总点击次数在一日累计，两日累计，三日累计中均有显著性差异。且在去掉10%和去掉20%极端样本的情况下仍然得到相同结果。可以做出版本更迭的决定。 
